@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600&family=Space+Grotesk:wght@400;500;700&display=swap"
           rel="stylesheet">
     <link rel="stylesheet" href="style.css"/>
-    <link rel="stylesheet" href="mobile.css" media="screen and (max-width: 768px)"/>
 </head>
 <body>
 
@@ -24,7 +23,18 @@
         <a href="#bilar" class="nav-link active">Bilar</a>
         <a href="#loggain" class="nav-link" id="nav-loggain">Logga In</a>
         <a href="#admin" class="nav-link" id="nav-admin" style="display: none;">Admin</a>
-        <a href="#admin-styleguide" class="nav-link" id="nav-styleguide" style="display: none;">Styleguide</a>
+
+        <div class="example-nav-item" id="nav-styleguide" style="display: none;">
+            <a href="#admin-styleguide" class="nav-link">Styleguide</a>
+            <div class="sub-nav">
+                <a href="#branding" class="sub-link">Typografi & Färg</a>
+                <a href="#components" class="sub-link">Komponenter</a>
+                <a href="#forms-tables" class="sub-link">Formulär & Tabeller</a>
+                <a href="#feedback" class="sub-link">Systemmeddelanden</a>
+                <a href="#css" class="sub-link">CSS & Variabler</a>
+            </div>
+        </div>
+
         <a href="#logout" class="nav-link" id="nav-logout" style="display: none;">Logga Ut</a>
     </nav>
     <button class="hamburger" id="hamburger" aria-label="Öppna meny" aria-expanded="false">
@@ -105,126 +115,118 @@
     <!-- Sektion: STYLEGUIDE -->
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
     <section id="admin-styleguide" class="page-section">
-        <div id="intro" class="page-section active">
-            <div class="hero">
-                <h1><span class="brand-logo brand-logo--static"
-                          style="display: inline-flex; font-size: inherit; padding-top: 0;"><span
-                        class="w">W</span><span class="i-dot">I</span><span class="rest">GELL</span></span><br/><span
-                        style="color: var(--accent)">Styleguide</span></h1>
-                <p>Välkommen till Wigellkoncernens designsystem. Här hittar du den grafiska profilen, UI-komponenter och
-                    kodexempel – allt som behövs för att utveckla skalbara, enhetliga och moderna applikationer inom
-                    hela koncernen.</p>
-                <div class="action-group"><a href="#branding" class="btn btn-primary nav-trigger">Visa Grafisk
-                    Profil</a></div>
-            </div>
+        <div class="hero">
+            <h1><span class="brand-logo brand-logo--static"
+                      style="display: inline-flex; font-size: inherit; padding-top: 0;"><span
+                    class="w">W</span><span class="i-dot">I</span><span class="rest">GELL</span></span><br/><span
+                    style="color: var(--accent)">Styleguide</span></h1>
+            <p>Välkommen till Wigellkoncernens designsystem. Här hittar du den grafiska profilen, UI-komponenter och
+                kodexempel – allt som behövs för att utveckla skalbara, enhetliga och moderna applikationer inom
+                hela koncernen.</p>
+            <div class="action-group"><a href="#branding" class="btn btn-primary nav-trigger">Visa Grafisk
+                Profil</a></div>
         </div>
+    </section>
 
-
-        <div id="branding" class="page-section">
-            <h2>Typografi & Färg</h2>
-            <p>Här är basen i Wigells visuella identitet. Genom att använda våra kärnvariabler och typografi
-                säkerställer du en enhetlig struktur i allt innehåll.</p>
-            <h3>Färgschema</h3>
-            <div class="color-grid">
-                <div class="color-swatch swatch-bg"><span>Mörk Bakgrund</span><code>#212121</code></div>
-                <div class="color-swatch swatch-elevated"><span>Upphöjd (Paneler)</span><code>#2a2a2a</code></div>
-                <div class="color-swatch swatch-accent"><span>Wigell Koppar (Primär)</span><code>#e69d67</code></div>
-                <div class="color-swatch swatch-function"><span>Cyan (Funktion)</span><code>#57cdfa</code></div>
-                <div class="color-swatch swatch-positive"><span>Smaragd (Positiv)</span><code>#57a773</code></div>
-                <div class="color-swatch swatch-negative"><span>Rost (Negativ)</span><code>#e55934</code></div>
-            </div>
-            <h3 style="margin-top: 3rem">Typografi</h3>
-            <p>Rubriker använder <strong>Teko</strong> (versaler, litet radavstånd) och brödtext använder <strong>Space
-                Grotesk</strong> (lättläst, dämpat vit).</p>
-            <div class="panel-discrete">
-                <h1>Rubrik H1 — Teko 600</h1>
-                <h2>Rubrik H2 — Teko 600</h2>
-                <h3>Rubrik H3 — Teko 600</h3>
-                <h4>Rubrik H4 — Teko 500</h4>
-                <p>Detta är standard brödtext (Space Grotesk). Den är designad för att vara lättläst med en dämpat vit
-                    färg. Används för allt generellt textinnehåll i applikationen.</p>
-            </div>
-            <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
-            <div class="code-wrapper">
-                <div class="code-snippet">
-                    <button class="copy-btn">Kopiera HTML</button>
-                    <pre><code>&lt;h1&gt;Rubrik H1&lt;/h1&gt;...</code></pre>
-                </div>
-            </div>
+    <section id="branding" class="page-section">
+        <h2>Typografi & Färg</h2>
+        <p>Här är basen i Wigells visuella identitet. Genom att använda våra kärnvariabler och typografi
+            säkerställer du en enhetlig struktur i allt innehåll.</p>
+        <h3>Färgschema</h3>
+        <div class="color-grid">
+            <div class="color-swatch swatch-bg"><span>Mörk Bakgrund</span><code>#212121</code></div>
+            <div class="color-swatch swatch-elevated"><span>Upphöjd (Paneler)</span><code>#2a2a2a</code></div>
+            <div class="color-swatch swatch-accent"><span>Wigell Koppar (Primär)</span><code>#e69d67</code></div>
+            <div class="color-swatch swatch-function"><span>Cyan (Funktion)</span><code>#57cdfa</code></div>
+            <div class="color-swatch swatch-positive"><span>Smaragd (Positiv)</span><code>#57a773</code></div>
+            <div class="color-swatch swatch-negative"><span>Rost (Negativ)</span><code>#e55934</code></div>
         </div>
-
-
-        <div id="components" class="page-section">
-            <h2>Interaktiva Komponenter</h2>
-            <p>Standardiserade element för interaktion.</p>
-            <h3>Knappar</h3>
-            <div class="panel-discrete btn-demo" style="display: flex; gap: 1rem; flex-wrap: wrap">
-                <button class="btn btn-generic">Generisk</button>
-                <button class="btn btn-secondary">Sekundär</button>
-                <button class="btn btn-primary">Primär</button>
-                <button class="btn btn-function">Funktion</button>
-                <button class="btn btn-positive">Positiv</button>
-                <button class="btn btn-negative">Negativ</button>
-            </div>
-            <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
-            <div class="code-wrapper">
-                <div class="code-snippet">
-                    <button class="copy-btn">Kopiera HTML</button>
-                    <pre><code>&lt;button class="btn btn-generic"&gt;...&lt;/button&gt;</code></pre>
-                </div>
-            </div>
+        <h3 style="margin-top: 3rem">Typografi</h3>
+        <p>Rubriker använder <strong>Teko</strong> (versaler, litet radavstånd) och brödtext använder <strong>Space
+            Grotesk</strong> (lättläst, dämpat vit).</p>
+        <div class="panel-discrete">
+            <h1>Rubrik H1 — Teko 600</h1>
+            <h2>Rubrik H2 — Teko 600</h2>
+            <h3>Rubrik H3 — Teko 600</h3>
+            <h4>Rubrik H4 — Teko 500</h4>
+            <p>Detta är standard brödtext (Space Grotesk). Den är designad för att vara lättläst med en dämpat vit
+                färg. Används för allt generellt textinnehåll i applikationen.</p>
         </div>
-
-
-        <div id="forms-tables" class="page-section">
-            <h2>Formulär & Tabeller</h2>
-            <h3>Inmatningsformulär</h3>
-            <div class="panel-discrete" style="max-width: 500px">
-                <div class="form-group">
-                    <label>Textfält</label>
-                    <input type="text" placeholder="Skriv in data..."/>
-                </div>
-            </div>
-
-            <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
-            <div class="code-wrapper">
-                <div class="code-snippet">
-                    <button class="copy-btn">Kopiera HTML</button>
-                    <pre><code>&lt;input type="text"&gt;</code></pre>
-                </div>
-            </div>
-        </div>
-
-
-        <div id="feedback" class="page-section">
-            <h2>Systemmeddelanden & Status</h2>
-            <h3>Laddningsindikator</h3>
-            <div class="panel-discrete"
-                 style="height: 120px; display: flex; align-items: center; justify-content: center">
-                <div class="loader"></div>
-            </div>
-            <h3>Notifikationer (Toasts)</h3>
-            <div class="panel-discrete" style="display: flex; flex-direction: column; gap: 1rem">
-                <div class="toast toast-success"><span class="diamond-icon"></span>Sparningen lyckades.</div>
-                <div class="toast toast-error"><span class="diamond-icon"></span>Ett fel uppstod.</div>
-            </div>
-        </div>
-
-
-        <div id="css" class="page-section">
-            <h2>CSS & Designsystem</h2>
-            <h3>Rot-variabler</h3>
-            <p>Klistra in detta block i toppen av din huvudstylesheet.</p>
-            <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
-            <div class="code-wrapper">
-                <div class="code-snippet">
-                    <button class="copy-btn">Kopiera CSS</button>
-                    <pre><code>:root { ... }</code></pre>
-                </div>
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+        <div class="code-wrapper">
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>&lt;h1&gt;Rubrik H1&lt;/h1&gt;...</code></pre>
             </div>
         </div>
     </section>
 
+    <section id="components" class="page-section">
+        <h2>Interaktiva Komponenter</h2>
+        <p>Standardiserade element för interaktion.</p>
+        <h3>Knappar</h3>
+        <div class="panel-discrete btn-demo" style="display: flex; gap: 1rem; flex-wrap: wrap">
+            <button class="btn btn-generic">Generisk</button>
+            <button class="btn btn-secondary">Sekundär</button>
+            <button class="btn btn-primary">Primär</button>
+            <button class="btn btn-function">Funktion</button>
+            <button class="btn btn-positive">Positiv</button>
+            <button class="btn btn-negative">Negativ</button>
+        </div>
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+        <div class="code-wrapper">
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>&lt;button class="btn btn-generic"&gt;...&lt;/button&gt;</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section id="forms-tables" class="page-section">
+        <h2>Formulär & Tabeller</h2>
+        <h3>Inmatningsformulär</h3>
+        <div class="panel-discrete" style="max-width: 500px">
+            <div class="form-group">
+                <label>Textfält</label>
+                <input type="text" placeholder="Skriv in data..."/>
+            </div>
+        </div>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+        <div class="code-wrapper">
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>&lt;input type="text"&gt;</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section id="feedback" class="page-section">
+        <h2>Systemmeddelanden & Status</h2>
+        <h3>Laddningsindikator</h3>
+        <div class="panel-discrete"
+             style="height: 120px; display: flex; align-items: center; justify-content: center">
+            <div class="loader"></div>
+        </div>
+        <h3>Notifikationer (Toasts)</h3>
+        <div class="panel-discrete" style="display: flex; flex-direction: column; gap: 1rem">
+            <div class="toast toast-success"><span class="diamond-icon"></span>Sparningen lyckades.</div>
+            <div class="toast toast-error"><span class="diamond-icon"></span>Ett fel uppstod.</div>
+        </div>
+    </section>
+
+    <section id="css" class="page-section">
+        <h2>CSS & Designsystem</h2>
+        <h3>Rot-variabler</h3>
+        <p>Klistra in detta block i toppen av din huvudstylesheet.</p>
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+        <div class="code-wrapper">
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>:root { ... }</code></pre>
+            </div>
+        </div>
+    </section>
 
 
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
@@ -253,8 +255,7 @@
     </dialog>
 </main>
 
-<div id="toast-container" aria-live="polite"
-     style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
 <script src="script.js"></script>
 </body>

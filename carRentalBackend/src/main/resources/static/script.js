@@ -15,9 +15,9 @@ const API_BASE = 'http://localhost:8080/api/v1';
 
 /**
  * Wrapper runt fetch() som automatiskt:
- *  - bifogar Authorization: Basic-header om användaren är inloggad
- *  - sätter credentials: 'include' för CORS med cookies
- *  - kastar ett Error med HTTP-statuskod om svaret inte är ok
+ * - bifogar Authorization: Basic-header om användaren är inloggad
+ * - sätter credentials: 'include' för CORS med cookies
+ * - kastar ett Error med HTTP-statuskod om svaret inte är ok
  *
  * @param {string} url       - Relativ eller absolut URL
  * @param {RequestInit} opts - Vanliga fetch-options (method, body, headers, ...)
@@ -56,7 +56,7 @@ async function apiFetch(url, opts = {}) {
     return res;
 }
 
-window.addEventListener('load', () => {    
+window.addEventListener('load', () => {
 
     // Återställer alla kod-toggles till stängt tillstånd
     const resetAllCodeToggles = () => {
@@ -68,12 +68,29 @@ window.addEventListener('load', () => {
         });
     };
 
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // HAMBURGER-MENY (MOBIL) - Deklareras tidigt för åtkomst i routing
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    const hamburger = document.getElementById('hamburger');
+    const navMenu   = document.querySelector('.nav-links');
+    function closeMenu() {
+        if(navMenu) navMenu.classList.remove('open');
+        if(hamburger) {
+            hamburger.classList.remove('open');
+            hamburger.setAttribute('aria-expanded', 'false');
+        }
+    }
+    if (hamburger) {
+        hamburger.addEventListener('click', () => {
+            const isOpen = navMenu.classList.toggle('open');
+            hamburger.classList.toggle('open', isOpen);
+            hamburger.setAttribute('aria-expanded', String(isOpen));
+        });
+    }
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     // SPA ROUTING
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-
-    const allNavLinks = document.querySelectorAll('.nav-link, .nav-trigger, #logo-link');
     const topNavLinks = document.querySelectorAll('header .nav-link');
     const sections    = document.querySelectorAll('main > .page-section'); // Only top-level sections
 
@@ -102,47 +119,60 @@ window.addEventListener('load', () => {
     };
 
     const navigateTo = (targetId) => {
-        // Sub-section of admin-styleguide
+        // Kontrollera om målet är en undersektion i Styleguiden
         const isSubSection = ['intro', 'branding', 'components', 'forms-tables', 'feedback', 'css'].includes(targetId);
+        let actualSectionId = targetId;
+
         if (isSubSection) {
-            targetId = 'admin-styleguide';
+            actualSectionId = targetId; // Visa sub-sektionen direkt
         }
 
-        // Auth Guard
+        // Auth Guard - Skydda adminvyer
         const adminViews = ['admin', 'admin-styleguide'];
-        if (adminViews.includes(targetId) && !state.currentUser?.isAdmin) {
+        if (adminViews.includes(actualSectionId) && !state.currentUser?.isAdmin) {
             showToast('Åtkomst nekad. Logga in som admin.', 'error');
-            targetId = 'loggain';
+            actualSectionId = 'loggain';
         }
 
         resetAllCodeToggles();
 
+        // Hantera navigations-highlighting
         topNavLinks.forEach(link => {
             link.classList.remove('active');
             let href = link.getAttribute('href');
-            if (href === '#' + targetId || (isSubSection && href === '#admin-styleguide')) {
+            if (href === '#' + actualSectionId || (isSubSection && href === '#admin-styleguide')) {
                 link.classList.add('active');
             }
         });
 
+        // Visa rätt huvudsektion
         sections.forEach(sec => {
             sec.classList.remove('active');
-            if (sec.id === targetId) sec.classList.add('active');
+            if (sec.id === actualSectionId) sec.classList.add('active');
         });
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Scrolla högst upp endast om vi byter huvudsektion (undviker att scrolla ifrån sub-sektioner)
+        if (!isSubSection) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-        // View logic
-        if (targetId === 'bilar') fetchCars();
-        if (targetId === 'admin') fetchAdminCars();
+        // Vy-specifik logik
+        if (actualSectionId === 'bilar') fetchCars();
+        if (actualSectionId === 'admin') fetchAdminCars();
     };
 
-    allNavLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            let targetId = link.getAttribute('href');
-            if (!targetId || targetId === '#') return;
-            
-            if (targetId === '#logout') {
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // GLOBAL CLICK LISTENER (Event Delegation för Länkar & Kod-toggles)
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    document.body.addEventListener('click', (e) => {
+
+        // 1. Hantera SPA-navigering (Huvudmenyer, sub-menyer och knappar som länkar)
+        const link = e.target.closest('a[href^="#"]');
+        if (link) {
+            const href = link.getAttribute('href');
+
+            // Hantera Logga ut
+            if (href === '#logout') {
                 e.preventDefault();
                 state.currentUser = null;
                 state.credentials = null;
@@ -153,23 +183,34 @@ window.addEventListener('load', () => {
                 return;
             }
 
-            e.preventDefault();
-            const idToNavigate = targetId.substring(1);
-            navigateTo(idToNavigate);
-            
-            // If it was a subsection, scroll to it inside the styleguide
-            const isSubSection = ['intro', 'branding', 'components', 'forms-tables', 'feedback', 'css'].includes(idToNavigate);
-            if(isSubSection) {
-                setTimeout(() => {
-                    const el = document.getElementById(idToNavigate);
-                    if(el) el.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
+            // Standard navigering
+            if (href.length > 1) { // Ignorera tomma hash-taggar
+                e.preventDefault();
+                const targetId = href.substring(1);
+
+                navigateTo(targetId);
+
+                // Om det är en undersektion i styleguiden, byt till rätt sub-sektion
+                const isSubSection = ['intro', 'branding', 'components', 'forms-tables', 'feedback', 'css'].includes(targetId);
+                if(isSubSection) {
+                    // Inget extra, hanteras som vanlig sektion
+                }
+
+                closeMenu();
             }
-            
-            closeMenu();
-        });
+        }
+
+        // 2. Hantera Visa/Dölj kodblock i Styleguiden
+        if (e.target.classList.contains('toggle-code-btn')) {
+            const codeWrapper = e.target.nextElementSibling;
+            if (codeWrapper) {
+                const isOpen = codeWrapper.classList.toggle('is-open');
+                e.target.innerHTML = isOpen ? 'Dölj kod &#8743;' : 'Visa kod &lt;/&gt;';
+            }
+        }
     });
 
+    // Kontrollera Hash vid sidladdning
     if (window.location.hash) {
         let initialTarget = window.location.hash.substring(1);
         if (document.getElementById(initialTarget) || ['intro', 'branding', 'components', 'forms-tables', 'feedback', 'css'].includes(initialTarget)) {
@@ -178,7 +219,10 @@ window.addEventListener('load', () => {
             if(isSubSection) {
                 setTimeout(() => {
                     const el = document.getElementById(initialTarget);
-                    if(el) el.scrollIntoView({ behavior: 'smooth' });
+                    if(el) {
+                        const y = el.getBoundingClientRect().top + window.scrollY - 100;
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                    }
                 }, 100);
             }
         } else {
@@ -196,7 +240,6 @@ window.addEventListener('load', () => {
     const bookingForm = document.getElementById('booking-form');
     const closeModalBtn = document.getElementById('close-modal-btn');
 
-    // Event Delegation för "Välj"-knapparna
     if (carsContainer) {
         carsContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('book-car-btn')) {
@@ -245,7 +288,7 @@ window.addEventListener('load', () => {
                     method: 'POST',
                     body: JSON.stringify({
                         carId: parseInt(carId),
-                        userId: state.currentUser.id, // Krävs av din backend
+                        userId: state.currentUser.id,
                         startDate: startDate,
                         endDate: endDate
                     })
@@ -254,9 +297,7 @@ window.addEventListener('load', () => {
                 showToast('Bokning genomförd!', 'success');
                 bookingModal.close();
                 bookingForm.reset();
-
-                // Uppdatera billistan så den valda bilen försvinner/blir markerad som bokad
-                fetchCars();
+                fetchCars(); // Uppdatera UI
 
             } catch (err) {
                 console.error(err);
@@ -289,37 +330,6 @@ window.addEventListener('load', () => {
     });
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // HAMBURGER-MENY (MOBIL)
-    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    const hamburger = document.getElementById('hamburger');
-    const navMenu   = document.querySelector('.nav-links');
-    function closeMenu() {
-        if(navMenu) navMenu.classList.remove('open');
-        if(hamburger) {
-            hamburger.classList.remove('open');
-            hamburger.setAttribute('aria-expanded', 'false');
-        }
-    }
-    if (hamburger) {
-        hamburger.addEventListener('click', () => {
-            const isOpen = navMenu.classList.toggle('open');
-            hamburger.classList.toggle('open', isOpen);
-            hamburger.setAttribute('aria-expanded', String(isOpen));
-        });
-    }
-
-    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // TOGGLE — DÖLJ/VISA KODBLOCK
-    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    document.querySelectorAll('.toggle-code-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const codeWrapper = btn.nextElementSibling;
-            const isOpen = codeWrapper.classList.toggle('is-open');
-            btn.innerHTML = isOpen ? 'Dölj kod &#8743;' : 'Visa kod &lt;/&gt;';
-        });
-    });
-
-    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     // AUTHENTICATION LOGIC
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     const loginForm = document.getElementById('login-form');
@@ -338,7 +348,6 @@ window.addEventListener('load', () => {
             }
 
             try {
-                // Anropa login-endpoint (ej skyddad, skicka utan Authorization-header)
                 const res  = await fetch(`${API_BASE}/auth/login`, {
                     method:      'POST',
                     headers:     { 'Content-Type': 'application/json' },
@@ -350,13 +359,13 @@ window.addEventListener('load', () => {
 
                 const data = await res.json();
 
-                // Spara state
+                // Spara session
                 state.currentUser = {
                     id:      data.userId,
                     username: data.username,
                     isAdmin:  data.isAdmin,
                 };
-                // Base64-koda "username:password" för Basic Auth på efterföljande anrop
+                // Base64-koda för Basic Auth
                 state.credentials = btoa(`${username}:${password}`);
 
                 loginForm.reset();
@@ -372,7 +381,6 @@ window.addEventListener('load', () => {
 
             } catch (err) {
                 errEl.style.display = 'block';
-                // Dölj eventuellt lösenord ur state om ett partiellt tillstånd uppstod
                 state.currentUser = null;
                 state.credentials = null;
             } finally {
@@ -391,7 +399,7 @@ window.addEventListener('load', () => {
         const container = document.getElementById('cars-container');
         if (!container) return;
         container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center;"><div class="loader" style="margin: 2rem auto;"></div></div>';
-        
+
         // Mock data fallback if backend is not running
         const mockData = [
             {id: 1, name: 'Volvo', model: 'XC60', type: 'SUV', price: 800, booked: false, feature1: 'AWD', feature2: 'Automat', feature3: 'GPS'},
@@ -406,7 +414,6 @@ window.addEventListener('load', () => {
             })
             .catch(err => {
                 console.warn('Kunde inte hämta bilar:', err.message);
-                // Behåll mock-data som fallback under dev
                 state.cars = mockData;
                 renderCars();
             });
@@ -442,10 +449,10 @@ window.addEventListener('load', () => {
                     <li>${car.feature2 || '-'}</li>
                     <li>${car.feature3 || '-'}</li>
                 </ul>
-                ${car.booked ? 
-                    '<span style="color: var(--color-negative); font-weight: bold;">Bokad</span>' : 
-                    `<button class="btn btn-primary book-car-btn" data-id="${car.id}" data-name="${car.name} ${car.model || ''}">Välj</button>`
-                }
+                ${car.booked ?
+            '<span style="color: var(--color-negative); font-weight: bold;">Bokad</span>' :
+            `<button class="btn btn-primary book-car-btn" data-id="${car.id}" data-name="${car.name} ${car.model || ''}">Välj</button>`
+        }
             </div>
         `).join('');
     }
@@ -461,23 +468,14 @@ window.addEventListener('load', () => {
         renderCars();
     });
 
-    window.orderCar = function(id) {
-        if (!state.currentUser) {
-            showToast('Du måste vara inloggad för att boka.', 'error');
-            navigateTo('loggain');
-            return;
-        }
-        showToast('Bokning initierad för bil ID ' + id, 'success');
-    };
-
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     // ADMIN DASHBOARD LOGIC
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     function fetchAdminCars() {
         const tbody = document.getElementById('admin-cars-tbody');
         if (!tbody) return;
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;"><div class="loader" style="margin: 1rem auto;"></div></td></tr>';
-        
+        tbody.innerHTML = '<tr><td colspan=\"5\" style=\"text-align: center;\"><div class=\"loader\" style=\"margin: 1rem auto;\"></div></td></tr>';
+
         apiFetch(`${API_BASE}/cars`)
             .then(res => res.json())
             .then(data => {
@@ -486,8 +484,7 @@ window.addEventListener('load', () => {
             })
             .catch(err => {
                 console.warn('Kunde inte hämta bilar:', err.message);
-                // using state.cars already populated or mock it again
-                renderAdminCars();
+                renderAdminCars(); // Fallback
             });
     }
 
@@ -507,7 +504,7 @@ window.addEventListener('load', () => {
         });
 
         if (sorted.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5">Inga bilar hittades.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan=\"5\">Inga bilar hittades.</td></tr>';
             return;
         }
 
@@ -518,9 +515,9 @@ window.addEventListener('load', () => {
                 <td>${car.type}</td>
                 <td>${car.price}</td>
                 <td>
-                    ${car.booked ? 
-                        '<span style="color: var(--color-negative);">Bokad</span>' : 
-                        '<span style="color: var(--color-positive);">Ledig</span>'}
+                    ${car.booked ?
+            '<span style=\"color: var(--color-negative);\">Bokad</span>' :
+            '<span style=\"color: var(--color-positive);\">Ledig</span>'}
                 </td>
             </tr>
         `).join('');
@@ -542,7 +539,7 @@ window.addEventListener('load', () => {
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     // SYSTEMMEDDELANDEN (TOASTS)
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    window.showToast = function(message, type = 'success') {
+    function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
         if (!container) return;
         const toast = document.createElement('div');
@@ -550,12 +547,13 @@ window.addEventListener('load', () => {
         toast.style.animation = 'fadeIn 0.3s ease forwards';
         toast.innerHTML = `<span class="diamond-icon"></span> ${message}`;
         container.appendChild(toast);
+
         setTimeout(() => {
             toast.style.opacity = '0';
             toast.style.transition = 'opacity 0.3s ease';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
-    };
+    }
 
     // Initial state check
     updateNavVisibility();
