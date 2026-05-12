@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Wigell Biluthyrning</title>
+    <link rel="icon" href="wigell_icon.ico"/>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600&family=Space+Grotesk:wght@400;500;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="mobile.css" media="screen and (max-width: 768px)"/>
+</head>
+<body>
+
+
+<!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+<!-- Sektion: LOGO & NAVIGERING -->
+<!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+<header>
+    <a href="#bilar" class="brand-logo" id="logo-link">
+        <span class="w">W</span><span class="i-dot">I</span><span class="rest">GELL</span>
+    </a>
+    <nav class="nav-links">
+        <a href="#bilar" class="nav-link active">Bilar</a>
+        <a href="#loggain" class="nav-link" id="nav-loggain">Logga In</a>
+        <a href="#admin" class="nav-link" id="nav-admin" style="display: none;">Admin</a>
+        <a href="#admin-styleguide" class="nav-link" id="nav-styleguide" style="display: none;">Styleguide</a>
+        <a href="#logout" class="nav-link" id="nav-logout" style="display: none;">Logga Ut</a>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="Öppna meny" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+</header>
+
+
+<main>
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <!-- Sektion: BILUTHYRNING -->
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <section id="bilar" class="page-section active">
+        <h2>Hyrbilar</h2>
+        <p>Välj en bil från vår flotta för att starta din bokning. Logga in för att slutföra.</p>
+        <div class="panel-discrete"
+             style="margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <span style="font-weight: 500; color: var(--text-muted);">Sortera på:</span>
+            <button class="btn btn-secondary" id="sort-name">Namn</button>
+            <button class="btn btn-secondary" id="sort-type">Typ</button>
+        </div>
+        <div id="cars-container"
+             style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;">
+            <!-- Cars loaded here -->
+        </div>
+    </section>
+
+
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <!-- Sektion: LOGGA IN -->
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <section id="loggain" class="page-section">
+        <h2>Logga In</h2>
+        <div class="panel panel-neutral" style="max-width: 500px; margin: 0 auto;">
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Användarnamn</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Lösenord</label>
+                    <input type="password" id="password" required>
+                </div>
+                <p id="login-error" style="color: var(--color-negative); display: none; margin-bottom: 1rem;">Felaktigt
+                    användarnamn eller lösenord.</p>
+                <button type="submit" class="btn btn-primary">Logga In</button>
+            </form>
+        </div>
+    </section>
+
+
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <!-- Sektion: ADMIN -->
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <section id="admin" class="page-section">
+        <h2>Adminpanel</h2>
+        <p>Hantering av systemdata. Sortera genom att klicka på kolumnrubrikerna.</p>
+        <div class="table-responsive">
+            <table class="table-long" id="admin-cars-table">
+                <thead>
+                <tr>
+                    <th class="sortable" data-col="id">ID</th>
+                    <th class="sortable" data-col="name">Namn</th>
+                    <th class="sortable" data-col="type">Typ</th>
+                    <th class="sortable" data-col="price">Pris</th>
+                    <th class="sortable" data-col="booked">Status</th>
+                </tr>
+                </thead>
+                <tbody id="admin-cars-tbody">
+                <!-- Admin car data loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <!-- Sektion: STYLEGUIDE -->
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <section id="admin-styleguide" class="page-section">
+        <div id="intro" class="page-section active">
+            <div class="hero">
+                <h1><span class="brand-logo brand-logo--static"
+                          style="display: inline-flex; font-size: inherit; padding-top: 0;"><span
+                        class="w">W</span><span class="i-dot">I</span><span class="rest">GELL</span></span><br/><span
+                        style="color: var(--accent)">Styleguide</span></h1>
+                <p>Välkommen till Wigellkoncernens designsystem. Här hittar du den grafiska profilen, UI-komponenter och
+                    kodexempel – allt som behövs för att utveckla skalbara, enhetliga och moderna applikationer inom
+                    hela koncernen.</p>
+                <div class="action-group"><a href="#branding" class="btn btn-primary nav-trigger">Visa Grafisk
+                    Profil</a></div>
+            </div>
+        </div>
+
+
+        <div id="branding" class="page-section">
+            <h2>Typografi & Färg</h2>
+            <p>Här är basen i Wigells visuella identitet. Genom att använda våra kärnvariabler och typografi
+                säkerställer du en enhetlig struktur i allt innehåll.</p>
+            <h3>Färgschema</h3>
+            <div class="color-grid">
+                <div class="color-swatch swatch-bg"><span>Mörk Bakgrund</span><code>#212121</code></div>
+                <div class="color-swatch swatch-elevated"><span>Upphöjd (Paneler)</span><code>#2a2a2a</code></div>
+                <div class="color-swatch swatch-accent"><span>Wigell Koppar (Primär)</span><code>#e69d67</code></div>
+                <div class="color-swatch swatch-function"><span>Cyan (Funktion)</span><code>#57cdfa</code></div>
+                <div class="color-swatch swatch-positive"><span>Smaragd (Positiv)</span><code>#57a773</code></div>
+                <div class="color-swatch swatch-negative"><span>Rost (Negativ)</span><code>#e55934</code></div>
+            </div>
+            <h3 style="margin-top: 3rem">Typografi</h3>
+            <p>Rubriker använder <strong>Teko</strong> (versaler, litet radavstånd) och brödtext använder <strong>Space
+                Grotesk</strong> (lättläst, dämpat vit).</p>
+            <div class="panel-discrete">
+                <h1>Rubrik H1 — Teko 600</h1>
+                <h2>Rubrik H2 — Teko 600</h2>
+                <h3>Rubrik H3 — Teko 600</h3>
+                <h4>Rubrik H4 — Teko 500</h4>
+                <p>Detta är standard brödtext (Space Grotesk). Den är designad för att vara lättläst med en dämpat vit
+                    färg. Används för allt generellt textinnehåll i applikationen.</p>
+            </div>
+            <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+            <div class="code-wrapper">
+                <div class="code-snippet">
+                    <button class="copy-btn">Kopiera HTML</button>
+                    <pre><code>&lt;h1&gt;Rubrik H1&lt;/h1&gt;...</code></pre>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="components" class="page-section">
+            <h2>Interaktiva Komponenter</h2>
+            <p>Standardiserade element för interaktion.</p>
+            <h3>Knappar</h3>
+            <div class="panel-discrete btn-demo" style="display: flex; gap: 1rem; flex-wrap: wrap">
+                <button class="btn btn-generic">Generisk</button>
+                <button class="btn btn-secondary">Sekundär</button>
+                <button class="btn btn-primary">Primär</button>
+                <button class="btn btn-function">Funktion</button>
+                <button class="btn btn-positive">Positiv</button>
+                <button class="btn btn-negative">Negativ</button>
+            </div>
+            <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+            <div class="code-wrapper">
+                <div class="code-snippet">
+                    <button class="copy-btn">Kopiera HTML</button>
+                    <pre><code>&lt;button class="btn btn-generic"&gt;...&lt;/button&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="forms-tables" class="page-section">
+            <h2>Formulär & Tabeller</h2>
+            <h3>Inmatningsformulär</h3>
+            <div class="panel-discrete" style="max-width: 500px">
+                <div class="form-group">
+                    <label>Textfält</label>
+                    <input type="text" placeholder="Skriv in data..."/>
+                </div>
+            </div>
+
+            <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+            <div class="code-wrapper">
+                <div class="code-snippet">
+                    <button class="copy-btn">Kopiera HTML</button>
+                    <pre><code>&lt;input type="text"&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="feedback" class="page-section">
+            <h2>Systemmeddelanden & Status</h2>
+            <h3>Laddningsindikator</h3>
+            <div class="panel-discrete"
+                 style="height: 120px; display: flex; align-items: center; justify-content: center">
+                <div class="loader"></div>
+            </div>
+            <h3>Notifikationer (Toasts)</h3>
+            <div class="panel-discrete" style="display: flex; flex-direction: column; gap: 1rem">
+                <div class="toast toast-success"><span class="diamond-icon"></span>Sparningen lyckades.</div>
+                <div class="toast toast-error"><span class="diamond-icon"></span>Ett fel uppstod.</div>
+            </div>
+        </div>
+
+
+        <div id="css" class="page-section">
+            <h2>CSS & Designsystem</h2>
+            <h3>Rot-variabler</h3>
+            <p>Klistra in detta block i toppen av din huvudstylesheet.</p>
+            <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+            <div class="code-wrapper">
+                <div class="code-snippet">
+                    <button class="copy-btn">Kopiera CSS</button>
+                    <pre><code>:root { ... }</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <!-- Sektion: BOKNINGS-MODAL -->
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <dialog id="booking-modal" class="panel panel-neutral" style="margin: auto; max-width: 400px;">
+        <h3>Boka Bil</h3>
+        <p id="booking-car-name" style="color: var(--text); font-weight: bold; margin-bottom: 1rem;"></p>
+        <form id="booking-form">
+            <input type="hidden" id="booking-car-id">
+            <div class="form-group">
+                <label for="start-date">Startdatum</label>
+                <input type="date" id="start-date" required
+                       style="background: #1a1a1a; color: white; border: none; border-bottom: 2px solid var(--border); padding: 10px; width: 100%;">
+            </div>
+            <div class="form-group">
+                <label for="end-date">Slutdatum</label>
+                <input type="date" id="end-date" required
+                       style="background: #1a1a1a; color: white; border: none; border-bottom: 2px solid var(--border); padding: 10px; width: 100%;">
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-positive">Bekräfta</button>
+                <button type="button" class="btn btn-secondary" id="close-modal-btn">Avbryt</button>
+            </div>
+        </form>
+    </dialog>
+</main>
+
+<div id="toast-container" aria-live="polite"
+     style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
