@@ -46,6 +46,8 @@ TABLES `car` WRITE;
 INSERT INTO `car`
 VALUES (2, _binary '\0', 'AC', 'Eluppvärmda backspeglar', 'CD växlare', NULL, 'M440I', 'BMW', 2999, 'Cab'),
 
+       (3, _binary '\0', 'AC', 'Eluppvärmda backspeglar', 'Dragkrok', NULL, 'Forester', 'Subaru', 2499, 'Kombi'),
+
        (4, _binary '\0', 'Rattvärme', 'Dragkrok', 'Keyless', NULL, 'V60', 'Volvo', 1899, 'Kombi'),
 
        (5, _binary '\0', 'Rattvärme', 'Dragkrok', 'Keyless', NULL, 'Enyaq', 'Skoda', 2499, 'El'),

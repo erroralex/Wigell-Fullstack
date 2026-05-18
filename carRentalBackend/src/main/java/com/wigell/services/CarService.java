@@ -70,6 +70,12 @@ public class CarService {
         existingCar.setFeature2(updatedCar.getFeature2());
         existingCar.setFeature3(updatedCar.getFeature3());
         existingCar.setBooked(updatedCar.isBooked());
+
+        // OBS: Fråga Tomas! Saknad bildhantering för uppdatering av bilens bild
+        if (updatedCar.getImage() != null) {
+            existingCar.setImage(updatedCar.getImage());
+        }
+
         return carRepo.save(existingCar);
     }
 
