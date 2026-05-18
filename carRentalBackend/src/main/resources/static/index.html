@@ -1,9 +1,17 @@
 <!DOCTYPE html>
+
+<!--
+  Wigell Rental - Vi Kör Dig
+  Utvecklare: Alexander Nilsson
+  Beskrivning: En webbapplikation för uthyrning av bilar.
+  Övrigt: Fuck Cancer!
+-->
+
 <html lang="sv">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Wigell Biluthyrning</title>
+    <title>Wigell Rental</title>
     <link rel="icon" href="wigell_icon.ico"/>
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600&family=Space+Grotesk:wght@400;500;700&display=swap"
           rel="stylesheet">
@@ -17,8 +25,9 @@
 <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
 <header>
     <a href="#bilar" class="brand-logo" id="logo-link">
-        <span class="w">W</span><span class="i-dot">I</span><span class="rest">GELL</span>
+        <span class="w">W</span><span class="i-dot">I</span><span class="rest">GELL RENTAL</span>
     </a>
+
     <nav class="nav-links">
         <a href="#bilar" class="nav-link active">Bilar</a>
         <a href="#loggain" class="nav-link" id="nav-loggain">Logga In</a>
@@ -50,16 +59,25 @@
     <section id="bilar" class="page-section active">
         <h2>Hyrbilar</h2>
         <p>Välj en bil från vår flotta för att starta din bokning. Logga in för att slutföra.</p>
+
         <div class="panel-discrete"
              style="margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
             <span style="font-weight: 500; color: var(--text-muted);">Sortera på:</span>
             <button class="btn btn-secondary" id="sort-name">Namn</button>
             <button class="btn btn-secondary" id="sort-type">Typ</button>
         </div>
-        <div id="cars-container"
-             style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;">
-            <!-- Cars loaded here -->
+
+        <br><br><br><br><br>
+
+        <div class="stage-wrap">
+            <div id="d9-stage"></div>
+            <div class="card-ctrl">
+                <button class="cnav" id="d9-prev" style="--accent:var(--accent)">&#8592;</button>
+                <div class="ccnt" id="d9-cnt"><em style="color:var(--accent)">1</em> / 5</div>
+                <button class="cnav" id="d9-next" style="--accent:var(--accent)">&#8594;</button>
+            </div>
         </div>
+
     </section>
 
 
@@ -68,7 +86,7 @@
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
     <section id="loggain" class="page-section">
         <h2>Logga In</h2>
-        <div class="panel panel-neutral" style="max-width: 500px; margin: 0 auto;">
+        <div class="panel panel-accent" style="max-width: 500px; margin: 0 auto;">
             <form id="login-form">
                 <div class="form-group">
                     <label for="username">Användarnamn</label>
@@ -91,6 +109,10 @@
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
     <section id="admin" class="page-section">
         <h2>Adminpanel</h2>
+
+        <!-- Knapp för att öppna modalen -->
+        <button id="open-add-car-btn" class="btn btn-positive" style="margin-bottom: 2rem;">Lägg till ny bil</button>
+
         <p>Hantering av systemdata. Sortera genom att klicka på kolumnrubrikerna.</p>
         <div class="table-responsive">
             <table class="table-long" id="admin-cars-table">
@@ -128,10 +150,15 @@
         </div>
     </section>
 
+    <!-- ─── TYPOGRAFI & FÄRG ───────────────────────────────────────────────────────────────────────────────────────────────── -->
+
     <section id="branding" class="page-section">
+
         <h2>Typografi & Färg</h2>
-        <p>Här är basen i Wigells visuella identitet. Genom att använda våra kärnvariabler och typografi
-            säkerställer du en enhetlig struktur i allt innehåll.</p>
+        <p>Här är basen i Wigells visuella identitet. Genom att använda våra kärnvariabler
+            och typografi säkerställer du en enhetlig struktur i allt innehåll.</p>
+
+        <!-- Färgschema -->
         <h3>Färgschema</h3>
         <div class="color-grid">
             <div class="color-swatch swatch-bg"><span>Mörk Bakgrund</span><code>#212121</code></div>
@@ -141,96 +168,1122 @@
             <div class="color-swatch swatch-positive"><span>Smaragd (Positiv)</span><code>#57a773</code></div>
             <div class="color-swatch swatch-negative"><span>Rost (Negativ)</span><code>#e55934</code></div>
         </div>
+
+        <!-- Typografi -->
         <h3 style="margin-top: 3rem">Typografi</h3>
-        <p>Rubriker använder <strong>Teko</strong> (versaler, litet radavstånd) och brödtext använder <strong>Space
-            Grotesk</strong> (lättläst, dämpat vit).</p>
+        <p>Rubriker använder <strong>Teko</strong> (versaler, litet radavstånd)
+            och brödtext använder <strong>Space Grotesk</strong> (lättläst, dämpat vit).</p>
+
         <div class="panel-discrete">
             <h1>Rubrik H1 — Teko 600</h1>
             <h2>Rubrik H2 — Teko 600</h2>
             <h3>Rubrik H3 — Teko 600</h3>
             <h4>Rubrik H4 — Teko 500</h4>
-            <p>Detta är standard brödtext (Space Grotesk). Den är designad för att vara lättläst med en dämpat vit
-                färg. Används för allt generellt textinnehåll i applikationen.</p>
+
+            <p>Detta är standard brödtext (Space Grotesk). Den är designad för att
+                vara lättläst med en dämpat vit färg. Används för allt generellt
+                textinnehåll i applikationen.</p>
         </div>
+
         <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
         <div class="code-wrapper">
+
             <div class="code-snippet">
                 <button class="copy-btn">Kopiera HTML</button>
-                <pre><code>&lt;h1&gt;Rubrik H1&lt;/h1&gt;...</code></pre>
+                <pre><code>
+          &lt;h1&gt;Rubrik H1&lt;/h1&gt;
+          &lt;h2&gt;Rubrik H2&lt;/h2&gt;
+          &lt;h3&gt;Rubrik H3&lt;/h3&gt;
+          &lt;h4&gt;Rubrik H4&lt;/h4&gt;
+          &lt;p&gt;Brödtext&lt;/p&gt;
+          </code></pre>
             </div>
-        </div>
-    </section>
 
-    <section id="components" class="page-section">
-        <h2>Interaktiva Komponenter</h2>
-        <p>Standardiserade element för interaktion.</p>
-        <h3>Knappar</h3>
-        <div class="panel-discrete btn-demo" style="display: flex; gap: 1rem; flex-wrap: wrap">
-            <button class="btn btn-generic">Generisk</button>
-            <button class="btn btn-secondary">Sekundär</button>
-            <button class="btn btn-primary">Primär</button>
-            <button class="btn btn-function">Funktion</button>
-            <button class="btn btn-positive">Positiv</button>
-            <button class="btn btn-negative">Negativ</button>
-        </div>
-        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
-        <div class="code-wrapper">
-            <div class="code-snippet">
-                <button class="copy-btn">Kopiera HTML</button>
-                <pre><code>&lt;button class="btn btn-generic"&gt;...&lt;/button&gt;</code></pre>
-            </div>
-        </div>
-    </section>
-
-    <section id="forms-tables" class="page-section">
-        <h2>Formulär & Tabeller</h2>
-        <h3>Inmatningsformulär</h3>
-        <div class="panel-discrete" style="max-width: 500px">
-            <div class="form-group">
-                <label>Textfält</label>
-                <input type="text" placeholder="Skriv in data..."/>
-            </div>
-        </div>
-
-        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
-        <div class="code-wrapper">
-            <div class="code-snippet">
-                <button class="copy-btn">Kopiera HTML</button>
-                <pre><code>&lt;input type="text"&gt;</code></pre>
-            </div>
-        </div>
-    </section>
-
-    <section id="feedback" class="page-section">
-        <h2>Systemmeddelanden & Status</h2>
-        <h3>Laddningsindikator</h3>
-        <div class="panel-discrete"
-             style="height: 120px; display: flex; align-items: center; justify-content: center">
-            <div class="loader"></div>
-        </div>
-        <h3>Notifikationer (Toasts)</h3>
-        <div class="panel-discrete" style="display: flex; flex-direction: column; gap: 1rem">
-            <div class="toast toast-success"><span class="diamond-icon"></span>Sparningen lyckades.</div>
-            <div class="toast toast-error"><span class="diamond-icon"></span>Ett fel uppstod.</div>
-        </div>
-    </section>
-
-    <section id="css" class="page-section">
-        <h2>CSS & Designsystem</h2>
-        <h3>Rot-variabler</h3>
-        <p>Klistra in detta block i toppen av din huvudstylesheet.</p>
-        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
-        <div class="code-wrapper">
             <div class="code-snippet">
                 <button class="copy-btn">Kopiera CSS</button>
-                <pre><code>:root { ... }</code></pre>
+                <pre><code>
+          h1, h2, h3, h4 {
+            font-family: 'Teko', sans-serif;
+            font-weight: 600;
+            line-height: 1.1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+          }
+        
+          h1 { font-size: clamp(4rem, 8vw, 6rem); }
+          h2 { font-size: 3rem; color: var(--text); }
+          h3 { font-size: 2.2rem; color: var(--accent); }
+          h4 { font-size: 1.8rem; color: var(--text); }
+        
+          p {
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1.6;
+          }
+          </code></pre>
+            </div>
+        </div>
+
+        <!-- Logo -->
+        <h3 style="margin-top: 3rem">Wigell Logotyp</h3>
+
+        <p>Logotypen är uppbyggd med text och en CSS-renderad "slips-form" som ersätter I:et,
+            med en diamant som prick ovanpå. I navigeringen animeras dessa vid hovring.
+            Klassen <code>.brand-logo--static</code> används när logotypen visas utan animering.</p>
+
+        <div class="panel-discrete"
+             style="display: flex; flex-direction: column; align-items: center; gap: 3rem; padding: 4rem">
+
+            <!-- Interaktiv variant - hovra för att se animering -->
+            <div>
+                <p style="text-align: center; margin-bottom: 1rem; font-size: 0.85rem;">Interaktiv — Hovra för
+                    animering</p>
+                <div class="brand-logo">
+                    <span class="w">W</span><span class="i-dot">I</span><span class="rest">GELL</span>
+                </div>
+            </div>
+
+            <!-- Statisk variant - ingen animering -->
+            <div>
+                <p style="text-align: center; margin-bottom: 1rem; font-size: 0.85rem;">Statisk — ingen animering</p>
+                <div class="brand-logo brand-logo--static">
+                    <span class="w">W</span><span class="i-dot">I</span><span class="rest">GELL</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>
+          &lt;!-- Interaktiv variant (navigering) --&gt;
+          &lt;a href="#" class="brand-logo"&gt;
+              &lt;span class="w"&gt;W&lt;/span&gt;&lt;span class="i-dot"&gt;I&lt;/span&gt;&lt;span class="rest"&gt;GELL&lt;/span&gt;
+          &lt;/a&gt;
+        
+          &lt;!-- Statisk variant (presentationer, rubriker) --&gt;
+          &lt;div class="brand-logo brand-logo--static"&gt;
+              &lt;span class="w"&gt;W&lt;/span&gt;&lt;span class="i-dot"&gt;I&lt;/span&gt;&lt;span class="rest"&gt;GELL&lt;/span&gt;
+          &lt;/div&gt;</code></pre>
+            </div>
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>
+        .brand-logo {
+            font-family: 'Teko', sans-serif;
+            font-weight: 600;
+            font-size: 3rem;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .brand-logo .w    { color: var(--accent); }
+        .brand-logo .rest { color: var(--text); }
+        
+        /* Slips-formen — ersätter det vanliga I:et */
+        .brand-logo .i-dot {
+            position: relative;
+            width: 0.35em;
+            display: inline-block;
+            color: transparent;
+        }
+        /* Diamant-punkten ovanpå slipsen */
+        .brand-logo .i-dot::before {
+            content: '';
+            position: absolute;
+            top: -0.1em;
+            left: 50%;
+            width: 0.2em; height: 0.2em;
+            background: var(--text);
+            transform: translateX(-50%) rotate(45deg);
+            transition: all var(--transition);
+        }
+        /* Slipskroppen */
+        .brand-logo .i-dot::after {
+            content: '';
+            position: absolute;
+            top: 0.15em;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0.28em; height: 0.7em;
+            background: var(--text);
+            clip-path: polygon(30% 0, 70% 0, 100% 75%, 50% 100%, 0 75%);
+            transition: all var(--transition);
+        }
+        /* Hover — hoppar över på .brand-logo--static */
+        .brand-logo:not(.brand-logo--static):hover .i-dot::before {
+            background: var(--accent);
+            transform: translateX(-50%) rotate(135deg) scale(1.3);
+            top: -0.25em;
+        }
+        .brand-logo:not(.brand-logo--static):hover .i-dot::after {
+            background: var(--accent);
+        }</code></pre>
             </div>
         </div>
     </section>
+
+    <!-- ─── KOMPONENTER ────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+
+    <section id="components" class="page-section">
+
+        <h2>Interaktiva Komponenter</h2>
+        <p>Standardiserade element för interaktion. Alla interaktiva element
+            använder Wigells "diamant/slipsknut"-geometri (45° rotation) på något sätt.</p>
+
+        <!-- Knappar -->
+        <h3>Knappar</h3>
+        <p>Välj stil baserat på handlingens syfte. Diamant-ikonen
+            animeras vid hovring på alla varianter där den förekommer.</p>
+
+        <div class="panel-discrete btn-demo" style="display: flex; gap: 1rem; flex-wrap: wrap">
+            <button class="btn btn-generic">Generisk / Diskret</button>
+            <button class="btn btn-secondary">Standard (Sekundär)</button>
+            <button class="btn btn-primary">Standard (Primär)</button>
+            <button class="btn btn-function">Skriv Ut / Filtrera</button>
+            <button class="btn btn-positive">Spara / Skapa</button>
+            <button class="btn btn-negative">Avbryt / Ta Bort</button>
+        </div>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>
+            &lt;button class="btn btn-generic"&gt;Generisk / Diskret&lt;/button&gt;
+            &lt;button class="btn btn-secondary"&gt;Standard (Sekundär)&lt;/button&gt;
+            &lt;button class="btn btn-primary"&gt;Standard (Primär)&lt;/button&gt;
+            &lt;button class="btn btn-function"&gt;Skriv Ut / Filtrera&lt;/button&gt;
+            &lt;button class="btn btn-positive"&gt;Spara / Skapa&lt;/button&gt;
+            &lt;button class="btn btn-negative"&gt;Avbryt / Ta Bort&lt;/button&gt;
+          </code></pre>
+            </div>
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>
+          /* Bas — gemensam för alla knappar */
+          .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          padding: 12px 48px;
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: 0.9rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          text-decoration: none;
+          border: none;
+          cursor: pointer;
+          transition: all var(--transition);
+          }
+
+          /* Diamant-ikon till vänster */
+          .btn::before {
+          content: '';
+          position: absolute;
+          left: 24px;
+          width: 10px; height: 10px;
+          transform: rotate(45deg);
+          transition: all var(--transition);
+          }
+          .btn:hover::before { transform: rotate(225deg) scale(1.3); }
+          
+          /* --- Varianter --- */
+          
+          /* Generisk / Diskret (Utan diamant) */
+          .btn-generic {
+          background: rgba(255, 255, 255, 0.1);
+          color: var(--text);
+          padding: 12px 24px; /* Justerad padding då diamanten saknas */
+          }
+          .btn-generic::before {
+          display: none;
+          }
+          .btn-generic:hover {
+          background: var(--accent);
+          color: var(--bg);
+          }
+          
+          /* Sekundär */
+          .btn-secondary { background: rgba(255, 255, 255, 0.05); color: var(--text); border: 1px solid var(--border); }
+          .btn-secondary::before { background: var(--accent); }
+          .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+          
+          /* Primär */
+          .btn-primary { background: var(--accent); color: var(--bg); }
+          .btn-primary::before { background: var(--bg); }
+          .btn-primary:hover { background: var(--accent-hover); }
+          
+          /* Funktion */
+          .btn-function { background: var(--color-function); color: var(--bg); }
+          .btn-function::before { background: var(--bg); }
+          .btn-function:hover { filter: brightness(1.1); }
+          
+          /* Positiv */
+          .btn-positive { background: var(--color-positive); color: var(--bg); }
+          .btn-positive::before { background: var(--bg); }
+          .btn-positive:hover { filter: brightness(1.1); }
+          
+          /* Negativ */
+          .btn-negative { background: transparent; color: var(--color-negative); border: 1px solid var(--color-negative); }
+          .btn-negative::before { background: var(--color-negative); }
+          .btn-negative:hover { background: var(--color-negative); color: var(--text); }
+          .btn-negative:hover::before { background: var(--text); }
+          </code></pre>
+            </div>
+        </div>
+
+        <!-- Navigering med undersidor -->
+        <h3 style="margin-top: 3rem">Navigering med Undersidor</h3>
+        <p>Hovra över "Uthyrning" för att se undermenyn. Undersidor visas som en
+            dropdown med samma diamant-estetik som övrig navigering.</p>
+
+        <div class="panel-discrete">
+            <nav class="example-nav">
+                <div class="example-nav-item">
+                    <a class="nav-link active">Produkter</a>
+                </div>
+                <div class="example-nav-item">
+                    <a class="nav-link">Uthyrning</a>
+                    <div class="sub-nav">
+                        <a class="sub-link">Slipsar</a>
+                        <a class="sub-link">Padel</a>
+                        <a class="sub-link">Camping</a>
+                        <a class="sub-link">reVent</a>
+                        <a class="sub-link">Snöskotrar</a>
+                    </div>
+                </div>
+                <div class="example-nav-item">
+                    <a class="nav-link">Ekonomi</a>
+                </div>
+                <div class="example-nav-item">
+                    <a class="nav-link">Rapporter</a>
+                </div>
+            </nav>
+        </div>
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>
+          &lt;nav class="example-nav"&gt;
+            &lt;div class="example-nav-item"&gt;
+                &lt;a class="nav-link active"&gt;Produkter&lt;/a&gt;
+            &lt;/div&gt;
+
+            &lt;!-- Element med undermeny: Hovra för att visa --&gt;
+            &lt;div class="example-nav-item"&gt;
+                &lt;a class="nav-link"&gt;Uthyrning&lt;/a&gt;
+                &lt;div class="sub-nav"&gt;
+                    &lt;a class="sub-link"&gt;Slipsar&lt;/a&gt;
+                    &lt;a class="sub-link"&gt;Padel&lt;/a&gt;
+                    &lt;a class="sub-link"&gt;Camping&lt;/a&gt;
+                    &lt;a class="sub-link"&gt;reVent&lt;/a&gt;
+                    &lt;a class="sub-link"&gt;Snöskotrar&lt;/a&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/nav&gt;
+          </code></pre>
+            </div>
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>
+        .example-nav { display: flex; gap: 0.5rem; }
+        .example-nav-item { position: relative; }
+        
+        /* Undermenyn — dold som standard, visas vid hover */
+        .sub-nav {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-top: 2px solid var(--accent);
+            min-width: 180px;
+            display: none;
+            flex-direction: column;
+            z-index: 100;
+        }
+        .example-nav-item:hover .sub-nav { display: flex; }
+        
+        .sub-link {
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all var(--transition);
+            cursor: pointer;
+        }
+        .sub-link:last-child { border-bottom: none; }
+        .sub-link::before {
+            content: '';
+            width: 5px; height: 5px;
+            border: 1px solid var(--text-muted);
+            transform: rotate(45deg);
+            transition: all var(--transition);
+            flex-shrink: 0;
+        }
+        .sub-link:hover { color: var(--accent); background: rgba(230,157,103,0.05); padding-left: 1.5rem; }
+        .sub-link:hover::before { background: var(--accent); border-color: var(--accent); }
+        </code></pre>
+            </div>
+        </div>
+
+        <!-- Innehållspaneler -->
+        <h3 style="margin-top: 3rem">Innehållspaneler</h3>
+        <p>Används för informationsgruppering eller statusblock. Diamanten
+            överst fylls med panelens färgkategori när användaren hovrar över ytan.</p>
+
+        <div class="panel-discrete" style="display: flex; flex-direction: column; gap: 2rem; padding-top: 3rem">
+            <div class="panel panel-accent">
+                <h4>Accent Panel</h4>
+                <p>Framhäver viktig information med Wigells primärfärg. Används sparsamt.</p>
+            </div>
+            <div class="panel panel-neutral">
+                <h4>Neutral Panel</h4>
+                <p>Innehåller standarddata, instruktioner eller övergripande funktionell information.</p>
+            </div>
+            <div class="panel panel-positive">
+                <h4>Positiv Panel</h4>
+                <p>Indikerar lyckade processer, systemfördelar eller slutförda steg i ett arbetsflöde.</p>
+            </div>
+            <div class="panel panel-negative">
+                <h4>Negativ Panel</h4>
+                <p>Drar uppmärksamhet till varningar, kritisk data eller destruktiva val.</p>
+            </div>
+            <div class="panel-discrete">
+                <h4>Diskret Panel</h4>
+                <p>Används för mindre viktiga meddelanden eller information som inte ska framhävas.</p>
+            </div>
+        </div>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>
+        &lt;div class="panel panel-accent"&gt;
+            &lt;h4&gt;Accent Panel&lt;/h4&gt;
+            &lt;p&gt;Framhäver viktig information...&lt;/p&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="panel panel-neutral"&gt;
+            &lt;h4&gt;Neutral Panel&lt;/h4&gt;
+            &lt;p&gt;Innehåller standarddata...&lt;/p&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="panel panel-positive"&gt;
+            &lt;h4&gt;Positiv Panel&lt;/h4&gt;
+            &lt;p&gt;Lyckad operation...&lt;/p&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="panel panel-negative"&gt;
+            &lt;h4&gt;Negativ Panel&lt;/h4&gt;
+            &lt;p&gt;Varning eller fel...&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div class="panel-discrete"&gt;
+            &lt;h4&gt;Diskret Panel&lt;/h4&gt;
+            &lt;p&gt;Används för mindre viktiga meddelanden...&lt;/p&gt;
+        &lt;/div&gt;</code></pre>
+            </div>
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>
+        .panel {
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            padding: 3rem 2rem;
+            position: relative;
+            transition: transform var(--transition);
+        }
+
+        /* Diamant-dekoration i överkanten */
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 2rem;
+            width: 12px; height: 12px;
+            background: var(--bg);
+            border: 2px solid;
+            transform: translateY(-50%) rotate(45deg);
+            transition: all var(--transition);
+        }
+
+        .panel:hover { transform: translateY(-5px); }
+        
+        /* Semantiska kantfärger */
+        .panel-accent   { border-color: var(--accent); }
+        .panel-neutral  { border-color: var(--color-function); }
+        .panel-positive { border-color: var(--color-positive); }
+        .panel-negative { border-color: var(--color-negative); }
+        
+        /* Diamant-färg */
+        .panel-accent::before   { border-color: var(--accent); }
+        .panel-neutral::before  { border-color: var(--color-function); }
+        .panel-positive::before { border-color: var(--color-positive); }
+        .panel-negative::before { border-color: var(--color-negative); }
+        
+        /* Hover — diamanten fylls med semantisk färg */
+        .panel-accent:hover::before   { background: var(--accent);         box-shadow: 0 0 15px rgba(230,157,103,0.4); }
+        .panel-neutral:hover::before  { background: var(--color-function); box-shadow: 0 0 15px rgba(87,205,250,0.4); }
+        .panel-positive:hover::before { background: var(--color-positive); box-shadow: 0 0 15px rgba(87,167,115,0.4); }
+        .panel-negative:hover::before { background: var(--color-negative); box-shadow: 0 0 15px rgba(229,89,52,0.4); }
+
+        /* Diskret panel */
+        .panel-discrete {
+            background: var(--bg-elevated);
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 1rem;    
+        }
+
+        .panel-discrete > *:last-child { margin-bottom: 0; }
+
+        </code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── FORMULÄR & TABELLER ────────────────────────────────────────────────────────────────────────────────────────────── -->
+
+    <section id="forms-tables" class="page-section">
+
+        <h2>Formulär & Tabeller</h2>
+
+        <!-- Formulär -->
+        <h3>Inmatningsformulär</h3>
+        <p>Textfält har en subtil underlinje som lyser upp vid fokus.
+            Radioknappar och kryssrutor ersätts med Wigells diamantdesign.</p>
+
+        <div class="panel-discrete" style="max-width: 500px">
+            <div class="form-group">
+                <label>Standard Textfält</label>
+                <input type="text" placeholder="Skriv in data här..."/>
+            </div>
+
+            <div class="form-group" style="margin-top: 1.5rem">
+                <label>Enskilt Val (Radioknapp)</label>
+                <label class="custom-check-label">
+                    <input type="radio" name="opts" checked/>
+                    <span class="diamond-box"></span> Alternativ Slips
+                </label>
+                <label class="custom-check-label">
+                    <input type="radio" name="opts"/>
+                    <span class="diamond-box"></span> Alternativ Fluga
+                </label>
+            </div>
+
+            <div class="form-group" style="margin-top: 1.5rem">
+                <label>Flerval (Kryssruta)</label>
+                <label class="custom-check-label">
+                    <input type="checkbox" checked/>
+                    <span class="diamond-box"></span> Inkludera Logistik
+                </label>
+                <label class="custom-check-label">
+                    <input type="checkbox"/>
+                    <span class="diamond-box"></span> Inkludera Kärndata
+                </label>
+            </div>
+
+        </div>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>
+        &lt;div class="form-group"&gt;
+            &lt;label&gt;Standard Textfält&lt;/label&gt;
+            &lt;input type="text" placeholder="Skriv data..."&gt;
+        &lt;/div&gt;
+        
+        &lt;label class="custom-check-label"&gt;
+            &lt;input type="radio" name="opts" checked&gt;
+            &lt;span class="diamond-box"&gt;&lt;/span&gt; Alternativ Alfa
+        &lt;/label&gt;
+        
+        &lt;label class="custom-check-label"&gt;
+            &lt;input type="checkbox"&gt;
+            &lt;span class="diamond-box"&gt;&lt;/span&gt; Inkludera Logistik
+        &lt;/label&gt;
+        </code></pre>
+            </div>
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+
+        .form-group > label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        input[type="text"] {
+            background: #1a1a1a;
+            border: none;
+            border-bottom: 2px solid var(--border);
+            color: var(--text);
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            width: 100%;
+            transition: var(--transition);
+        }
+        input[type="text"]:focus { border-bottom-color: var(--accent); }
+        
+        /* Anpassad radio/checkbox med diamant */
+        .custom-check-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            user-select: none;
+        }
+
+        .custom-check-label input { display: none; }
+        
+        .diamond-box {
+            width: 14px; height: 14px;
+            transform: rotate(45deg);
+            border: 2px solid var(--text-muted);
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .custom-check-label input:checked + .diamond-box {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        </code></pre>
+            </div>
+        </div>
+
+        <!-- Tabeller -->
+        <h3 style="margin-top: 3rem">Tabeller</h3>
+
+        <h4>Lång Listtabell</h4>
+        <p>Optimerad för vertikal läsbarhet med alternerande zebra-ränder och hover-markering.</p>
+        <div class="panel-discrete">
+            <table class="table-long">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Filialer</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>001</td>
+                    <td>Wigell Camping</td>
+                    <td>Öppen</td>
+                </tr>
+                <tr>
+                    <td>002</td>
+                    <td>Wigell Travels</td>
+                    <td>Stängd</td>
+                </tr>
+                <tr>
+                    <td>003</td>
+                    <td>Wigell MC Rental</td>
+                    <td>Renovering</td>
+                </tr>
+                <tr>
+                    <td>004</td>
+                    <td>Wigell Cinema</td>
+                    <td>Öppen</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>
+        &lt;table class="table-long"&gt;
+            &lt;thead&gt;
+                &lt;tr&gt;
+                    &lt;th&gt;ID&lt;/th&gt;&lt;th&gt;Filialer&lt;/th&gt;&lt;th&gt;Status&lt;/th&gt;
+                &lt;/tr&gt;
+            &lt;/thead&gt;
+            &lt;tbody&gt;
+                &lt;tr&gt;
+                    &lt;td&gt;001&lt;/td&gt;&lt;td&gt;Wigell Camping&lt;/td&gt;&lt;td&gt;Öppen&lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;/tbody&gt;
+        &lt;/table&gt;</code></pre>
+            </div>
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>
+        .table-long {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            background: var(--bg-elevated);
+        }
+
+        .table-long th, .table-long td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table-long th {
+            font-family: 'Teko', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            color: var(--accent);
+        }
+
+        /* Zebra-ränder för läsbarhet */
+        .table-long tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+        .table-long tbody tr:hover           { background: rgba(230,157,103,0.05); }
+        
+        /* Responsiv tabell — horisontell scroll på smala skärmar */
+        .table-responsive { overflow-x: auto; width: 100%; }
+        </code></pre>
+            </div>
+        </div>
+
+        <h4>Datarik Tabell (Många Kolumner)</h4>
+        <p>Omslut med <code>.table-responsive</code> för horisontell scrollning
+            utan att förstöra layouten på smala skärmar.</p>
+
+        <div class="panel-discrete">
+            <div class="table-responsive">
+                <table class="table-long">
+                    <thead>
+                    <tr>
+                        <th>Nod</th>
+                        <th>Sektor</th>
+                        <th>Upplänk</th>
+                        <th>Fördröjning</th>
+                        <th>Integritet</th>
+                        <th>Bandbredd</th>
+                        <th>Synk</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>A-12</td>
+                        <td>Heavy</td>
+                        <td>Online</td>
+                        <td>12ms</td>
+                        <td>99.9%</td>
+                        <td>10Gbps</td>
+                        <td>Sann</td>
+                    </tr>
+                    <tr>
+                        <td>B-04</td>
+                        <td>Core</td>
+                        <td>Online</td>
+                        <td>08ms</td>
+                        <td>100%</td>
+                        <td>40Gbps</td>
+                        <td>Sann</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>
+        &lt;div class="table-responsive"&gt;
+            &lt;table class="table-long"&gt;
+                &lt;!-- Samma struktur som lång listtabell --&gt;
+            &lt;/table&gt;
+        &lt;/div&gt;
+        </code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── SYSTEMMEDDELANDEN ──────────────────────────────────────────────────────────────────────────────────────────────── -->
+
+    <section id="feedback" class="page-section">
+
+        <h2>Systemmeddelanden & Status</h2>
+        <p>Kommunicera systemets nuvarande status tydligt till användaren via
+            laddningsindikatorer och tillfälliga notifikationer.</p>
+
+        <!-- Laddningsindikator -->
+        <h3>Laddningsindikator</h3>
+        <p>Den roterande, fyllda diamanten indikerar pågående bakgrundsprocesser.
+            Knuten till logotypens formspråk för visuell konsistens.</p>
+
+        <div class="panel-discrete" style="height: 120px; display: flex; align-items: center; justify-content: center">
+            <div class="loader"></div>
+        </div>
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>&lt;div class="loader"&gt;&lt;/div&gt;</code></pre>
+            </div>
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>
+        .loader {
+            width: 32px; height: 32px;
+            background-color: var(--accent);
+            animation: diamondFlip 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            box-shadow: 0 0 15px rgba(230, 157, 103, 0.5);
+        }
+        
+        /* 3D-flip-animation på alla tre axlar */
+        @keyframes diamondFlip {
+            0%   { transform: perspective(200px) rotateX(0deg)    rotateY(0deg)    rotateZ(45deg); }
+            50%  { transform: perspective(200px) rotateX(-180deg) rotateY(0deg)    rotateZ(45deg); }
+            100% { transform: perspective(200px) rotateX(-180deg) rotateY(-180deg) rotateZ(45deg); }
+        }</code></pre>
+            </div>
+        </div>
+
+        <!-- Toasts -->
+        <h3 style="margin-top: 3rem">Notifikationer (Toasts)</h3>
+        <p>Tillfälliga meddelanden för att bekräfta att en händelse lyckats eller
+            misslyckats. Visas normalt i ett hörn av skärmen.</p>
+
+        <div class="panel-discrete" style="display: flex; flex-direction: column; gap: 1rem">
+            <div class="toast toast-success">
+                <span class="diamond-icon"></span>
+                Sparningen lyckades. Databasen är uppdaterad.
+            </div>
+
+            <div class="toast toast-error">
+                <span class="diamond-icon"></span>
+                Ett fel uppstod: Uppkopplingen till servern bröts.
+            </div>
+        </div>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>&lt;div class="toast toast-success"&gt;
+            &lt;span class="diamond-icon"&gt;&lt;/span&gt;
+            Sparningen lyckades. Databasen är uppdaterad.
+        &lt;/div&gt;
+        
+        &lt;div class="toast toast-error"&gt;
+            &lt;span class="diamond-icon"&gt;&lt;/span&gt;
+            Ett fel uppstod: Uppkopplingen till servern bröts.
+        &lt;/div&gt;</code></pre>
+            </div>
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>
+        .toast {
+            padding: 16px 24px;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Fylld diamant-ikon */
+        .diamond-icon {
+            width: 12px; height: 12px;
+            transform: rotate(45deg);
+            display: block;
+            flex-shrink: 0;
+        }
+
+        /* Färgade varianter — vänsterkant + ikon-färg */
+        .toast-success               { border-left: 4px solid var(--color-positive); }
+        .toast-success .diamond-icon  { background: var(--color-positive); }
+        .toast-error                 { border-left: 4px solid var(--color-negative); }
+        .toast-error .diamond-icon    { background: var(--color-negative); }</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── CSS & DESIGNSYSTEM ─────────────────────────────────────────────────────────────────────────────────────────────── -->
+
+    <section id="css" class="page-section">
+
+        <h2>CSS & Designsystem</h2>
+
+        <!-- Kod- och namngivningsstandard -->
+        <h3>Kod- och Namngivningsstandard</h3>
+        <p style="margin-bottom: 1.5rem;">För att hålla Wigells kodbas ren, skalbar och lättarbetad för alla utvecklare
+            i teamet, följer vi dessa grundläggande principer:</p>
+        <div class="panel-discrete" style="margin-bottom: 3rem;">
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem;">
+                <!-- Namngivning -->
+                <div style="flex: 1; min-width: 250px;">
+                    <h5 style="color: var(--accent); font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; letter-spacing: 1px;">
+                        Namngivning (CSS)</h5>
+                    <ul style="color: var(--text-muted); padding-left: 1.5rem; font-size: 0.95rem; line-height: 1.6;">
+                        <li style="margin-bottom: 0.5rem;"><strong>Komponentbaserat:</strong> Vi utgår från ett
+                            grundblock (t.ex. <code>.btn</code>, <code>.panel</code>).
+                        </li>
+                        <li style="margin-bottom: 0.5rem;"><strong>Modifierare:</strong> Varianter av en komponent
+                            prefixas med grundnamnet (t.ex. <code>.btn-primary</code>, <code>.panel-negative</code>).
+                        </li>
+                        <li style="margin-bottom: 0.5rem;"><strong>Små bokstäver och bindestreck:</strong> Klasser
+                            skrivs alltid med gemener (kebab-case), t.ex. <code>.nav-links</code>.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Kodstandard -->
+                <div style="flex: 1; min-width: 250px;">
+                    <h5 style="color: var(--accent); font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; letter-spacing: 1px;">
+                        Kodstandard</h5>
+                    <ul style="color: var(--text-muted); padding-left: 1.5rem; font-size: 0.95rem; line-height: 1.6;">
+                        <li style="margin-bottom: 0.5rem;"><strong>Använd variabler:</strong> Hårdkoda aldrig färger
+                            eller animationstider. Använd alltid våra CSS Custom Properties (ex.
+                            <code>var(--accent)</code>).
+                        </li>
+                        <li style="margin-bottom: 0.5rem;"><strong>Semantisk HTML:</strong> Använd rätt HTML5-taggar
+                            (<code>&lt;nav&gt;</code>, <code>&lt;section&gt;</code>) istället för oändliga <code>&lt;div&gt;</code>-element.
+                        </li>
+                        <li style="margin-bottom: 0.5rem;"><strong>Responsivt först:</strong> Använd relativa enheter
+                            (<code>rem</code>, <code>%</code>) och media-queries för att säkerställa att komponenten
+                            fungerar på alla skärmar.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- CSS-variabler -->
+        <h3>Rot-variabler</h3>
+        <p>Klistra in detta block i toppen av din huvudstylesheet. Alla
+            Wigell-komponenter förutsätter att dessa variabler finns tillgängliga
+            globalt via <code>:root</code>.</p>
+
+        <div class="panel-discrete">
+            <div class="css-var-grid">
+                <div class="css-var-row">
+                    <span class="css-swatch" style="background: #212121"></span>
+                    <code>--bg</code>
+                    <span class="css-var-desc">Sidans huvudbakgrund</span>
+                </div>
+                <div class="css-var-row">
+                    <span class="css-swatch" style="background: #2a2a2a"></span>
+                    <code>--bg-elevated</code>
+                    <span class="css-var-desc">Paneler, kort och upphöjda ytor</span>
+                </div>
+                <div class="css-var-row">
+                    <span class="css-swatch" style="background: #111111"></span>
+                    <code>--bg-code</code>
+                    <span class="css-var-desc">Kodblock och terminalbakgrund</span>
+                </div>
+                <div class="css-var-row">
+                    <span class="css-swatch" style="background: #e69d67"></span>
+                    <code>--accent</code>
+                    <span class="css-var-desc">Wigell Koppar — primär varumärkesfärg</span>
+                </div>
+                <div class="css-var-row">
+                    <span class="css-swatch" style="background: #f2aa77"></span>
+                    <code>--accent-hover</code>
+                    <span class="css-var-desc">Koppar hover-tillstånd</span>
+                </div>
+                <div class="css-var-row">
+                    <span class="css-swatch" style="background: #57cdfa"></span>
+                    <code>--color-function</code>
+                    <span class="css-var-desc">Cyan — funktionella åtgärder</span>
+                </div>
+                <div class="css-var-row">
+                    <span class="css-swatch" style="background: #57a773"></span>
+                    <code>--color-positive</code>
+                    <span class="css-var-desc">Smaragd — framgång, bekräftelse</span>
+                </div>
+                <div class="css-var-row">
+                    <span class="css-swatch" style="background: #e55934"></span>
+                    <code>--color-negative</code>
+                    <span class="css-var-desc">Rost — fel, varning, destruktiv åtgärd</span>
+                </div>
+                <div class="css-var-row">
+                    <span class="css-swatch" style="background: #ffffff"></span>
+                    <code>--text</code>
+                    <span class="css-var-desc">Primär textfärg</span>
+                </div>
+                <div class="css-var-row">
+                    <span class="css-swatch" style="background: #a0a0a0"></span>
+                    <code>--text-muted</code>
+                    <span class="css-var-desc">Sekundär text — etiketter, hjälptext</span>
+                </div>
+                <div class="css-var-row">
+                    <span class="css-swatch"
+                          style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2)"></span>
+                    <code>--border</code>
+                    <span class="css-var-desc">Subtila skiljelinjer och kanter</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>
+        :root {
+            --bg: #212121;
+            --bg-elevated: #2a2a2a;
+            --bg-code: #111111;
+        
+            --accent: #e69d67;
+            --accent-hover: #f2aa77;
+            --color-function: #57cdfa;
+            --color-positive: #57a773;
+            --color-negative: #e55934;
+        
+            --text: #ffffff;
+            --text-muted: #a0a0a0;
+            --border: rgba(255, 255, 255, 0.08);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }</code></pre>
+            </div>
+        </div>
+
+        <!-- Typsnitt -->
+        <h3>Typsnitt</h3>
+        <p>Wigell använder två Google Fonts. Importera länken i
+            <code>&lt;head&gt;</code> innan dina egna stylesheets.</p>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>&lt;link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"&gt;</code></pre>
+            </div>
+        </div>
+
+        <!-- Diamant-geometrin -->
+        <h3>Diamant-geometrin</h3>
+        <p>Wigells visuella signum är den 45°-roterade kvadraten. Den återkommer
+            i logotyp, knappar, navigering, paneler och formulärkontroller.
+            Implementeras alltid med <code>transform: rotate(45deg)</code>.</p>
+
+        <div class="panel-discrete"
+             style="display: flex; gap: 3rem; align-items: center; justify-content: center; padding: 3rem; flex-wrap: wrap">
+            <div style="text-align: center">
+                <div style="width: 20px; height: 20px; background: var(--accent); transform: rotate(45deg); margin: 1rem auto"></div>
+                <p style="font-size: 0.85rem; margin: 0">Fylld — aktiv/vald</p>
+            </div>
+            <div style="text-align: center">
+                <div style="width: 20px; height: 20px; border: 2px solid var(--accent); transform: rotate(45deg); margin: 1rem auto"></div>
+                <p style="font-size: 0.85rem; margin: 0">Kontur — tillgänglig</p>
+            </div>
+            <div style="text-align: center">
+                <div style="width: 20px; height: 20px; border: 2px solid var(--text-muted); transform: rotate(45deg); margin: 1rem auto"></div>
+                <p style="font-size: 0.85rem; margin: 0">Dämpad — inaktiv</p>
+            </div>
+        </div>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>
+        /* Grundläggande diamant-form */
+        .diamond {
+            width: 16px; height: 16px;
+            transform: rotate(45deg);
+            background: var(--accent);
+        }
+        
+        /* Diamant med hover-rotation */
+        .diamond::before {
+            content: '';
+            width: 10px; height: 10px;
+            transform: rotate(45deg);
+            transition: all var(--transition);
+        }
+        .diamond:hover::before { transform: rotate(225deg) scale(1.3); }</code></pre>
+            </div>
+        </div>
+
+        <!-- Övergångar -->
+        <h3>Övergångar</h3>
+        <p>Använd alltid <code>--transition</code>-variabeln för konsekventa
+            animationer. Kurvan ger ett snabbt intryck och ett mjukt avslut.</p>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+
+        <div class="code-wrapper">
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>
+        /* Använd variabeln — hårdkoda aldrig övergångsvärden */
+        .element {
+            transition: all var(--transition);
+        }
+        
+        /* Samma som: */
+        .element {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }</code></pre>
+            </div>
+        </div>
+    </section>
+
 
 
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
-    <!-- Sektion: BOKNINGS-MODAL -->
+    <!-- Modal: BOKA BIL -->
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
     <dialog id="booking-modal" class="panel panel-neutral" style="margin: auto; max-width: 400px;">
         <h3>Boka Bil</h3>
@@ -253,10 +1306,84 @@
             </div>
         </form>
     </dialog>
+
+
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <!-- Modal: LÄGG TILL / REDIGERA BIL -->
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <dialog id="add-car-modal" class="panel panel-neutral" style="margin: auto; max-width: 500px; width: 100%;">
+        <h3 id="add-car-title">Lägg till ny bil</h3>
+        <form id="add-car-form" style="margin-top: 1rem;">
+            <input type="hidden" id="edit-car-id"> <!-- Döljt ID-fält för Redigering -->
+
+            <div class="form-group">
+                <label for="name">Märke</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="model">Modell</label>
+                <input type="text" id="model">
+            </div>
+            <div class="form-group">
+                <label for="type">Typ (SUV, Sedan, etc)</label>
+                <input type="text" id="type" required>
+            </div>
+            <div class="form-group">
+                <label for="price">Pris (kr/dag)</label>
+                <input type="number" id="price" required style="background: #1a1a1a; color: white; border: none; border-bottom: 2px solid var(--border); padding: 12px 16px; font-family: inherit; font-size: 1rem; outline: none; width: 100%;">
+            </div>
+            <div class="form-group">
+                <label for="feature1">Egenskap 1 (t.ex. Automat)</label>
+                <input type="text" id="feature1" placeholder="Egenskap 1">
+            </div>
+            <div class="form-group">
+                <label for="feature2">Egenskap 2 (t.ex. GPS)</label>
+                <input type="text" id="feature2" placeholder="Egenskap 2">
+            </div>
+            <div class="form-group">
+                <label for="feature3">Egenskap 3 (t.ex. Elbil)</label>
+                <input type="text" id="feature3" placeholder="Egenskap 3">
+            </div>
+            <div class="form-group">
+                <label for="car-image">Bilbild (.png/.jpg) - Vid redigering kan du lämna tom</label>
+                <input type="file" id="car-image" accept="image/png, image/jpeg" style="margin-top: 0.5rem; color: var(--text-muted);">
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-positive" id="add-car-submit-btn">Spara bil</button>
+                <button type="button" class="btn btn-secondary" id="close-add-car-btn">Avbryt</button>
+            </div>
+        </form>
+    </dialog>
+
+
+
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <!-- Modal: BEKRÄFTA BORTTAGNING -->
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <dialog id="delete-confirm-modal" class="panel panel-negative" style="margin: auto; max-width: 400px; width: 100%;">
+        <h3 style="color: var(--color-negative);">Ta bort bil</h3>
+        <p>Är du säker på att du vill ta bort <strong id="delete-car-name" style="color: white;"></strong>? Denna åtgärd kan inte ångras.</p>
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button type="button" class="btn btn-negative" id="confirm-delete-btn">Ja, ta bort</button>
+            <button type="button" class="btn btn-secondary" id="cancel-delete-btn">Avbryt</button>
+        </div>
+    </dialog>
+
+
+
 </main>
 
 <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
 <script src="script.js"></script>
 </body>
+
+<footer >
+    <p style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 2rem;">
+        &copy; 2026 Wigell Rental. En del av Wigellkoncernen. Alla rättigheter förbehållna. <br><br>
+        &copy; 2026 Wigell SecNet | &copy; 2026 Wigell Padel | &copy; 2025 Wigell Camping | &copy; 2025 Wigell
+        Kalkylatorn
+    </p>
+</footer>
+
 </html>
