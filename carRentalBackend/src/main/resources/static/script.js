@@ -6,11 +6,18 @@ const state = {
     credentials: null,
     cars: [],
     bookings: [],
+    userBookings: [],
     users: [],
     carSortBy: 'name',
     carSortDesc: false,
     adminSortBy: 'id',
-    adminSortDesc: false
+    adminSortDesc: false,
+    adminUsersSortBy: 'id',
+    adminUsersSortDesc: false,
+    adminBookingsSortBy: 'id',
+    adminBookingsSortDesc: false,
+    userBookingsSortBy: 'startDate',
+    userBookingsSortDesc: false
 };
 
 const API_BASE = 'http://localhost:8080/api/v1';
@@ -75,75 +82,6 @@ async function apiFetch(url, opts = {}) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-// CAROUSEL & IMAGE UTILITIES
-// ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-function shadeHex(hex, amt) {
-    const n = parseInt(hex.replace('#', ''), 16);
-    const r = Math.min(255, Math.max(0, (n >> 16) + amt));
-    const g = Math.min(255, Math.max(0, ((n >> 8) & 0xff) + amt));
-    const b = Math.min(255, Math.max(0, (n & 0xff) + amt));
-    return `rgb(${r},${g},${b})`;
-}
-
-function renderPlaceholderSVG(color) {
-    const d = '#141414', rim = '#2a2a2a', glass = 'rgba(255,255,255,0.1)', gEdge = 'rgba(255,255,255,0.12)';
-    const bodyShade = shadeHex(color, -35);
-    const w = (cx, r) => `<circle cx="${cx}" cy="96" r="${r}" fill="${d}" stroke="${rim}" stroke-width="2"/><circle cx="${cx}" cy="96" r="${r * .58}" fill="${rim}" stroke="${color}" stroke-width="1.5"/><circle cx="${cx}" cy="96" r="${r * .22}" fill="${color}"/>`;
-    const shape = `<path d="M 18,72 L 20,90 L 260,90 L 262,72 L 222,60 L 56,60 Z" fill="${color}"/><path d="M 66,60 L 76,28 L 195,28 L 200,60 Z" fill="${bodyShade}"/><path d="M 78,30 L 132,30 L 130,60 L 70,60 Z" fill="${glass}" stroke="${gEdge}" stroke-width="1"/><path d="M 135,30 L 193,30 L 197,60 L 133,60 Z" fill="${glass}" stroke="${gEdge}" stroke-width="1"/>${w(67, 21)} ${w(215, 21)}`;
-
-    return `<svg viewBox="0 0 280 115" xmlns="http://www.w3.org/2000/svg" fill="none" style="width:100%; height:100%; padding: 20px;">${shape}</svg>`;
-}
-
-function mapCarTo3D(dbCar) {
-    const colors = ['#e69d67', '#57cdfa', '#57a773', '#e55934'];
-    const assignedColor = colors[dbCar.id % colors.length];
-
-    return {
-        id: dbCar.id,
-        name: `${dbCar.name} ${dbCar.model || ''}`.trim(),
-        type: dbCar.type || 'Okänd',
-        price: dbCar.price,
-        booked: dbCar.booked,
-        color: assignedColor,
-        bg: '#111111',
-        feats: [dbCar.feature1, dbCar.feature2, dbCar.feature3].filter(Boolean),
-        image: dbCar.image
-    };
-}
-
-function build3DCard(car) {
-    const div = document.createElement('div');
-    div.className = 'car-card';
-
-    const imgHtml = car.image
-        ? `<img src="data:image/png;base64,${car.image}" style="width:100%; height:100%; object-fit:contain; position:absolute; top:0; left:0; border-radius: 8px 8px 0 0; padding: 1rem; box-sizing: border-box;">`
-        : renderPlaceholderSVG(car.color);
-
-    const btnHtml = car.booked
-        ? `<button class="valj-btn" disabled style="background: var(--color-negative); color: #fff; cursor: not-allowed; opacity: 0.8;">
-              <span class="dia" style="background:#fff"></span>BOKAD
-           </button>`
-        : `<button class="valj-btn book-car-btn" data-id="${car.id}" data-name="${car.name}" style="background:${car.color};color:#1a1a1a">
-              <span class="dia" style="background:#1a1a1a"></span>VÄLJ
-           </button>`;
-
-    div.innerHTML = `
-        <div class="car-img" style="background:${car.bg}; position:relative;">
-            ${imgHtml}
-            <div class="car-badge" style="color:${car.color};border-color:${car.color}; z-index:2;">${car.type}</div>
-        </div>
-        <div class="car-body">
-            <div class="car-name" style="color:${car.color}">${car.name}</div>
-            <div class="car-price"><strong>${car.price}</strong> kr/dag</div>
-            <ul class="car-feats">
-                ${car.feats.map(f => `<li><span style="background:${car.color};width:5px;height:5px;transform:rotate(45deg);flex-shrink:0;display:inline-block"></span>${f}</li>`).join('')}
-            </ul>
-            ${btnHtml}
-        </div>`;
-    return div;
-}
-
-// ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 // MAIN APPLICATION LOGIC
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
@@ -178,26 +116,42 @@ window.addEventListener('load', () => {
     const sections = document.querySelectorAll('main > .page-section');
 
     const updateNavVisibility = () => {
-        const navLoggain = document.getElementById('nav-loggain');
+        const navLogin = document.getElementById('nav-login');
+        const navLogout = document.getElementById('nav-logout');
+        const navCars = document.getElementById('nav-cars');
+        const navMinaSidor = document.getElementById('nav-mina-sidor');
+
+        // Admin-länkar
         const navAdmin = document.getElementById('nav-admin');
         const navStyleguide = document.getElementById('nav-styleguide');
-        const navLogout = document.getElementById('nav-logout');
+
 
         if (state.currentUser) {
-            if (navLoggain) navLoggain.style.display = 'none';
+            if (navLogin) navLogin.style.display = 'none';
             if (navLogout) navLogout.style.display = 'flex';
+
             if (state.currentUser.isAdmin) {
                 if (navAdmin) navAdmin.style.display = 'flex';
                 if (navStyleguide) navStyleguide.style.display = 'flex';
+
+                if (navMinaSidor) navMinaSidor.style.display = 'none';
+                if (navCars) navCars.style.display = 'none';
             } else {
+                if (navCars) navCars.style.display = 'flex';
+                if (navMinaSidor) navMinaSidor.style.display = 'flex';
+
                 if (navAdmin) navAdmin.style.display = 'none';
                 if (navStyleguide) navStyleguide.style.display = 'none';
             }
         } else {
-            if (navLoggain) navLoggain.style.display = 'flex';
+            if (navLogin) navLogin.style.display = 'flex';
             if (navLogout) navLogout.style.display = 'none';
+
+            if (navMinaSidor) navMinaSidor.style.display = 'none';
             if (navAdmin) navAdmin.style.display = 'none';
             if (navStyleguide) navStyleguide.style.display = 'none';
+
+            if (navCars) navCars.style.display = 'flex';
         }
     };
 
@@ -205,11 +159,11 @@ window.addEventListener('load', () => {
         const isSubSection = ['branding', 'components', 'forms-tables', 'feedback', 'css'].includes(targetId);
         let actualSectionId = targetId;
 
-        const adminViews = ['admin', 'admin-styleguide', 'branding', 'components', 'forms-tables', 'feedback', 'css'];
+        const adminViews = ['admin-cars', 'admin-styleguide', 'admin-users', 'admin-bookings', 'branding', 'components', 'forms-tables', 'feedback', 'css'];
 
         if (adminViews.includes(actualSectionId) && !state.currentUser?.isAdmin) {
             showToast('Åtkomst nekad. Logga in som admin.', 'error');
-            actualSectionId = 'loggain';
+            actualSectionId = 'login';
         }
 
         resetAllCodeToggles();
@@ -229,10 +183,13 @@ window.addEventListener('load', () => {
 
         window.scrollTo({top: 0, behavior: 'smooth'});
 
-        if (actualSectionId === 'bilar') fetchCars();
-        if (actualSectionId === 'admin') fetchAdminCars();
+        if (actualSectionId === 'cars') fetchCars();
+        if (actualSectionId === 'admin-cars') fetchAdminCars();
+        if (actualSectionId === 'admin-users') fetchAdminUsers();
+        if (actualSectionId === 'admin-bookings') fetchAdminBookings();
+        if (actualSectionId === 'mina-sidor') fetchUserBookings();
 
-        if (actualSectionId === 'loggain') {
+        if (actualSectionId === 'login') {
             setTimeout(() => {
                 const usernameInput = document.getElementById('username');
                 if (usernameInput) usernameInput.focus();
@@ -256,7 +213,7 @@ window.addEventListener('load', () => {
                 state.credentials = null;
                 saveSession();
                 updateNavVisibility();
-                navigateTo('bilar');
+                navigateTo('cars');
                 showToast('Utloggad', 'success');
                 closeMenu();
                 return;
@@ -289,10 +246,23 @@ window.addEventListener('load', () => {
             }
         }
 
-        // Tabellsortering
-        const th = e.target.closest('#admin-cars-table th.sortable');
-        if (th) {
-            const col = th.getAttribute('data-col');
+        // Tabellsortering för bil-listan
+        const carTh = e.target.closest('#cars-table th.sortable');
+        if (carTh) {
+            const col = carTh.getAttribute('data-col');
+            if (state.carSortBy === col) {
+                state.carSortDesc = !state.carSortDesc;
+            } else {
+                state.carSortBy = col;
+                state.carSortDesc = false;
+            }
+            renderCars();
+        }
+
+        // Tabellsortering för admin-bilar
+        const adminCarTh = e.target.closest('#admin-cars-table th.sortable');
+        if (adminCarTh) {
+            const col = adminCarTh.getAttribute('data-col');
             if (state.adminSortBy === col) {
                 state.adminSortDesc = !state.adminSortDesc;
             } else {
@@ -302,12 +272,38 @@ window.addEventListener('load', () => {
             renderAdminCars();
         }
 
+        // Tabellsortering för admin-användare
+        const adminUserTh = e.target.closest('#admin-users-table th.sortable');
+        if (adminUserTh) {
+            const col = adminUserTh.getAttribute('data-col');
+            if (state.adminUsersSortBy === col) {
+                state.adminUsersSortDesc = !state.adminUsersSortDesc;
+            } else {
+                state.adminUsersSortBy = col;
+                state.adminUsersSortDesc = false;
+            }
+            renderAdminUsers();
+        }
+
+        // Tabellsortering för admin-bokningar
+        const adminBookingTh = e.target.closest('#admin-bookings-table th.sortable');
+        if (adminBookingTh) {
+            const col = adminBookingTh.getAttribute('data-col');
+            if (state.adminBookingsSortBy === col) {
+                state.adminBookingsSortDesc = !state.adminBookingsSortDesc;
+            } else {
+                state.adminBookingsSortBy = col;
+                state.adminBookingsSortDesc = false;
+            }
+            renderAdminBookings();
+        }
+
         // BOKNING - Öppna modal
         const bookBtn = e.target.closest('.book-car-btn');
         if (bookBtn) {
             if (!state.currentUser) {
                 showToast('Du måste vara inloggad för att boka.', 'error');
-                navigateTo('loggain');
+                navigateTo('login');
                 return;
             }
 
@@ -372,11 +368,70 @@ window.addEventListener('load', () => {
             const deleteModal = document.getElementById('delete-confirm-modal');
             if (deleteModal) deleteModal.showModal();
         }
+
+        // ADMIN - Redigera användare
+        const editUserBtn = e.target.closest('.edit-user-btn');
+        if (editUserBtn) {
+            const userId = editUserBtn.getAttribute('data-id');
+            const user = state.users.find(u => u.id == userId);
+            if (user) {
+                const editUserModal = document.getElementById('edit-user-modal');
+                document.getElementById('edit-user-id').value = user.id;
+                document.getElementById('edit-user-username').value = user.username || '';
+                document.getElementById('edit-user-firstname').value = user.firstName || '';
+                document.getElementById('edit-user-lastname').value = user.lastName || '';
+                document.getElementById('edit-user-phone').value = user.phone || '';
+                document.getElementById('edit-user-email').value = user.email || '';
+                document.getElementById('edit-user-role').value = user.role || 'ROLE_USER';
+                if (editUserModal) editUserModal.showModal();
+            }
+        }
+
+        const deleteUserBtn = e.target.closest('.delete-user-btn');
+        if (deleteUserBtn) {
+            const userId = deleteUserBtn.getAttribute('data-id');
+            const userName = deleteUserBtn.getAttribute('data-name');
+            if (!confirm(`Vill du verkligen ta bort användaren ${userName}?`)) return;
+            apiFetch(`${API_BASE}/users/${userId}`, {method: 'DELETE'})
+                .then(() => {
+                    showToast('Användaren togs bort', 'success');
+                    fetchAdminUsers();
+                })
+                .catch(() => showToast('Kunde inte ta bort användaren', 'error'));
+        }
+
+        // ADMIN - Redigera bokning
+        const editBookingBtn = e.target.closest('.edit-booking-btn');
+        if (editBookingBtn) {
+            const bookingId = editBookingBtn.getAttribute('data-id');
+            const booking = state.bookings.find(b => b.id == bookingId);
+            if (booking) {
+                const editBookingModal = document.getElementById('edit-booking-modal');
+                document.getElementById('edit-booking-id').value = booking.id;
+                document.getElementById('edit-booking-start').value = booking.fromDate || '';
+                document.getElementById('edit-booking-end').value = booking.toDate || '';
+                document.getElementById('edit-booking-end').min = booking.fromDate || '';
+                if (editBookingModal) editBookingModal.showModal();
+            }
+        }
+
+        const deleteBookingBtn = e.target.closest('.delete-booking-btn');
+        if (deleteBookingBtn) {
+            const bookingId = deleteBookingBtn.getAttribute('data-id');
+            if (!confirm('Vill du verkligen ta bort bokningen?')) return;
+            apiFetch(`${API_BASE}/bookings/${bookingId}`, {method: 'DELETE'})
+                .then(() => {
+                    showToast('Bokningen togs bort', 'success');
+                    fetchAdminBookings();
+                    fetchUserBookings();
+                })
+                .catch(() => showToast('Kunde inte ta bort bokningen', 'error'));
+        }
     });
 
     const currentHash = window.location.hash.substring(1);
     if (currentHash) navigateTo(currentHash);
-    else navigateTo('bilar');
+    else navigateTo('cars');
 
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -448,8 +503,8 @@ window.addEventListener('load', () => {
                     body: JSON.stringify({
                         carId: parseInt(carId),
                         userId: state.currentUser.id,
-                        startDate: startDate,
-                        endDate: endDate
+                        fromDate: startDate,
+                        toDate: endDate
                     })
                 });
 
@@ -647,10 +702,10 @@ window.addEventListener('load', () => {
                 updateNavVisibility();
 
                 if (data.isAdmin) {
-                    navigateTo('admin');
+                    navigateTo('admin-cars');
                     showToast(`Inloggad som administratör`, 'success');
                 } else {
-                    navigateTo('bilar');
+                    navigateTo('cars');
                     showToast(`Inloggad som ${data.username}`, 'success');
                 }
 
@@ -667,34 +722,232 @@ window.addEventListener('load', () => {
         });
     }
 
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────-
+    // USER REGISTRATION (SKAPA ANVÄNDARE)
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    const openRegisterBtn = document.getElementById('open-register-btn');
+    const registerModal = document.getElementById('register-modal');
+    const closeRegisterBtn = document.getElementById('close-register-btn');
+    const registerForm = document.getElementById('register-form');
+
+    if (openRegisterBtn && registerModal) {
+        openRegisterBtn.addEventListener('click', () => {
+            registerModal.showModal();
+            setTimeout(() => document.getElementById('register-username')?.focus(), 50);
+        });
+    }
+
+    if (closeRegisterBtn) {
+        closeRegisterBtn.addEventListener('click', () => {
+            if (registerModal) registerModal.close();
+            registerForm?.reset();
+        });
+    }
+
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = registerForm.querySelector('button[type="submit"]');
+            const username = document.getElementById('register-username').value.trim();
+            const firstName = document.getElementById('register-firstname').value.trim();
+            const lastName = document.getElementById('register-lastname').value.trim();
+            const phone = document.getElementById('register-phone').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+
+            if (!username || !firstName || !lastName || !phone || !email || !password) {
+                showToast('Fyll i alla fält.', 'error');
+                return;
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Skapar...';
+            }
+
+            try {
+                await apiFetch(`${API_BASE}/users`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        username,
+                        firstName,
+                        lastName,
+                        phone,
+                        email,
+                        password,
+                        role: 'ROLE_USER',
+                        noOfOrders: 0
+                    })
+                });
+
+                showToast('Konto skapat', 'success');
+                if (registerModal) registerModal.close();
+                registerForm.reset();
+
+                const loginUsername = document.getElementById('username');
+                if (loginUsername) {
+                    loginUsername.value = username;
+                    loginUsername.focus();
+                }
+            } catch (err) {
+                console.error(err);
+                showToast(err.serverMessage || 'Kunde inte skapa konto.', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Skapa konto';
+                }
+            }
+        });
+    }
+
+    const editUserModal = document.getElementById('edit-user-modal');
+    const editUserForm = document.getElementById('edit-user-form');
+    const closeEditUserBtn = document.getElementById('close-edit-user-btn');
+    const editBookingModal = document.getElementById('edit-booking-modal');
+    const editBookingForm = document.getElementById('edit-booking-form');
+    const closeEditBookingBtn = document.getElementById('close-edit-booking-btn');
+    const editBookingStart = document.getElementById('edit-booking-start');
+    const editBookingEnd = document.getElementById('edit-booking-end');
+
+    if (closeEditUserBtn) {
+        closeEditUserBtn.addEventListener('click', () => {
+            if (editUserModal) editUserModal.close();
+            editUserForm?.reset();
+        });
+    }
+
+    if (editUserForm) {
+        editUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('edit-user-id').value;
+            const username = document.getElementById('edit-user-username').value.trim();
+            const firstName = document.getElementById('edit-user-firstname').value.trim();
+            const lastName = document.getElementById('edit-user-lastname').value.trim();
+            const phone = document.getElementById('edit-user-phone').value.trim();
+            const email = document.getElementById('edit-user-email').value.trim();
+            const role = document.getElementById('edit-user-role').value;
+            const submitBtn = editUserForm.querySelector('button[type="submit"]');
+
+            if (!username || !firstName || !lastName || !phone || !email) {
+                showToast('Fyll i alla användarfält.', 'error');
+                return;
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sparar...';
+            }
+
+            try {
+                await apiFetch(`${API_BASE}/users/${userId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        username,
+                        firstName,
+                        lastName,
+                        phone,
+                        email,
+                        role
+                    })
+                });
+
+                showToast('Användaren uppdaterades', 'success');
+                if (editUserModal) editUserModal.close();
+                editUserForm.reset();
+                fetchAdminUsers();
+            } catch (err) {
+                console.error(err);
+                showToast('Kunde inte uppdatera användaren', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Spara ändringar';
+                }
+            }
+        });
+    }
+
+    if (closeEditBookingBtn) {
+        closeEditBookingBtn.addEventListener('click', () => {
+            if (editBookingModal) editBookingModal.close();
+            editBookingForm?.reset();
+        });
+    }
+
+    if (editBookingStart && editBookingEnd) {
+        editBookingStart.addEventListener('change', function () {
+            editBookingEnd.min = this.value;
+        });
+    }
+
+    if (editBookingForm) {
+        editBookingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const bookingId = document.getElementById('edit-booking-id').value;
+            const startDate = document.getElementById('edit-booking-start').value;
+            const endDate = document.getElementById('edit-booking-end').value;
+            const submitBtn = editBookingForm.querySelector('button[type="submit"]');
+
+            if (endDate <= startDate) {
+                showToast('Slutdatum måste vara efter startdatum.', 'error');
+                return;
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sparar...';
+            }
+
+            try {
+                await apiFetch(`${API_BASE}/bookings/${bookingId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        fromDate: startDate,
+                        toDate: endDate
+                    })
+                });
+
+                showToast('Bokningen uppdaterades', 'success');
+                if (editBookingModal) editBookingModal.close();
+                editBookingForm.reset();
+                fetchAdminBookings();
+                fetchUserBookings();
+            } catch (err) {
+                console.error(err);
+                showToast('Kunde inte uppdatera bokningen', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Spara ändringar';
+                }
+            }
+        });
+    }
+
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     // CAR RENTAL LOGIC (STANDARD GRID)
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     function fetchCars() {
-        const container = document.getElementById('cars-container');
-        if (container) container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center;"><div class="loader" style="margin: 2rem auto;"></div></div>';
-
-        const stage = document.getElementById('d9-stage');
-        if (stage) stage.innerHTML = '<div style="text-align: center;"><div class="loader" style="margin: 2rem auto;"></div></div>';
+        const carsBody = document.getElementById('cars-tbody');
+        if (carsBody) carsBody.innerHTML = '<tr><td colspan="5" style="text-align: center;"><div class="loader" style="margin: 2rem auto;"></div></td></tr>';
 
         apiFetch(`${API_BASE}/cars`)
             .then(res => res.json())
             .then(data => {
                 state.cars = data;
                 renderCars();
-                render3DCarousel();
             })
             .catch(err => {
                 console.warn('Kunde inte hämta bilar:', err.message);
                 showToast('Kunde inte nå servern.', 'error');
                 renderCars();
-                render3DCarousel();
             });
     }
 
     function renderCars() {
-        const container = document.getElementById('cars-container');
-        if (!container) return;
+        const tbody = document.getElementById('cars-tbody');
+        if (!tbody) return;
 
         let sorted = [...state.cars];
         sorted.sort((a, b) => {
@@ -708,118 +961,39 @@ window.addEventListener('load', () => {
         });
 
         if (sorted.length === 0) {
-            container.innerHTML = '<p>Inga bilar tillgängliga.</p>';
+            tbody.innerHTML = '<tr><td colspan="5">Inga bilar tillgängliga.</td></tr>';
             return;
         }
 
-        container.innerHTML = sorted.map(car => {
-            const imgHTML = car.image
-                ? `<img src="data:image/png;base64,${car.image}" style="width:100%; height:200px; object-fit:contain; border-radius:4px; margin-bottom:1rem; background: #111; padding: 10px; box-sizing: border-box;">`
-                : `<div style="height:200px; background:#111; border-radius:4px; margin-bottom:1rem; display:flex; align-items:center; justify-content:center;">${renderPlaceholderSVG('var(--accent)')}</div>`;
+        tbody.innerHTML = sorted.map(car => `
+            <tr>
+                <td><strong>${car.name}</strong> ${car.model || ''}</td>
+                <td>${car.type || 'Okänd'}</td>
+                <td>${car.price} kr/dag</td>
+                <td>${car.booked ? '<span style="color: var(--color-negative);">Bokad</span>' : '<span style="color: var(--color-positive);">Ledig</span>'}</td>
+                <td style="white-space: nowrap;">
+                    ${car.booked ?
+                        '<button class="btn btn-negative" disabled>Bokad</button>' :
+                        `<button class="btn btn-primary book-car-btn" data-id="${car.id}" data-name="${car.name} ${car.model || ''}">Välj</button>`
+                    }
+                </td>
+            </tr>
+        `).join('');
 
-            return `
-        <div class="panel ${car.booked ? 'panel-negative' : 'panel-accent'}" style="padding: 2rem;">
-            ${imgHTML}
-                <h3>${car.name} ${car.model || ''}</h3>
-                <p style="margin-bottom: 0.5rem; color: var(--text);"><strong>Typ:</strong> ${car.type}</p>
-                <p style="margin-bottom: 0.5rem; color: var(--text);"><strong>Pris:</strong> ${car.price} kr/dag</p>
-                <ul style="margin-left: 1.5rem; margin-bottom: 1.5rem; color: var(--text-muted);">
-                    <li>${car.feature1 || '-'}</li>
-                    <li>${car.feature2 || '-'}</li>
-                    <li>${car.feature3 || '-'}</li>
-                </ul>
-                ${car.booked ?
-                '<span style="color: var(--color-negative); font-weight: bold;">Bokad</span>' :
-                `<button class="btn btn-primary book-car-btn" data-id="${car.id}" data-name="${car.name} ${car.model || ''}">Välj</button>`
+        document.querySelectorAll('#cars-table th.sortable').forEach(th => {
+            th.classList.remove('sort-asc', 'sort-desc');
+            th.removeAttribute('aria-sort');
+            if (th.getAttribute('data-col') === state.carSortBy) {
+                const dir = state.carSortDesc ? 'descending' : 'ascending';
+                th.classList.add(state.carSortDesc ? 'sort-desc' : 'sort-asc');
+                th.setAttribute('aria-sort', dir);
+            } else {
+                th.setAttribute('aria-sort', 'none');
             }
-            </div>`
-        }).join('');
-    }
-
-    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // 3D CAROUSEL RENDER LOGIC
-    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    let carouselCur = 0;
-
-    function render3DCarousel() {
-        const stage = document.getElementById('d9-stage');
-        const cnt = document.getElementById('d9-cnt');
-
-        if (!stage) return;
-
-        stage.innerHTML = '';
-        const n = state.cars.length;
-        if (n === 0) {
-            if (cnt) cnt.innerHTML = '';
-            return;
-        }
-
-        if (carouselCur >= n) carouselCur = 0;
-
-        const plane = document.createElement('div');
-        plane.className = 'wrapper';
-        stage.appendChild(plane);
-
-        const cards = state.cars.map(dbCar => {
-            const mappedCar = mapCarTo3D(dbCar);
-            const c = build3DCard(mappedCar);
-            plane.appendChild(c);
-            return c;
         });
-
-        function layout() {
-            plane.style.transform = `translateX(${carouselCur * -160}px) rotateX(25deg)`;
-            cards.forEach((c, i) => {
-                const dist = i - carouselCur;
-                if (i === carouselCur) {
-                    c.style.transform = `translateX(${i * 160}px) translateZ(80px) rotateX(-25deg) scale(1.05)`;
-                    c.style.opacity = 1;
-                    c.style.filter = 'brightness(1)';
-                    c.style.zIndex = 10;
-                    c.style.boxShadow = '0 30px 50px rgba(0,0,0,0.6)';
-                    c.style.pointerEvents = 'auto';
-                } else {
-                    c.style.transform = `translateX(${i * 160}px) translateZ(0) rotateX(0) scale(0.85)`;
-                    c.style.opacity = Math.abs(dist) < 3 ? 0.6 : 0;
-                    c.style.filter = 'brightness(0.4)';
-                    c.style.zIndex = 5;
-                    c.style.boxShadow = '0 5px 15px rgba(0,0,0,0.5)';
-                    c.style.pointerEvents = 'none';
-                }
-            });
-            if (cnt) cnt.innerHTML = `<em style="color:var(--accent)">${carouselCur + 1}</em> / ${n}`;
-        }
-
-        const nextBtn = document.getElementById('d9-next');
-        const prevBtn = document.getElementById('d9-prev');
-        if (nextBtn) nextBtn.onclick = () => {
-            carouselCur = (carouselCur + 1) % n;
-            layout();
-        };
-        if (prevBtn) prevBtn.onclick = () => {
-            carouselCur = (carouselCur - 1 + n) % n;
-            layout();
-        };
-
-        setTimeout(layout, 50);
     }
 
-    document.getElementById('sort-name')?.addEventListener('click', () => {
-        if (state.carSortBy === 'name') state.carSortDesc = !state.carSortDesc;
-        else {
-            state.carSortBy = 'name';
-            state.carSortDesc = false;
-        }
-        renderCars();
-    });
-    document.getElementById('sort-type')?.addEventListener('click', () => {
-        if (state.carSortBy === 'type') state.carSortDesc = !state.carSortDesc;
-        else {
-            state.carSortBy = 'type';
-            state.carSortDesc = false;
-        }
-        renderCars();
-    });
+
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     // ADMIN DASHBOARD LOGIC
@@ -885,10 +1059,229 @@ window.addEventListener('load', () => {
 
         document.querySelectorAll('#admin-cars-table th.sortable').forEach(th => {
             th.classList.remove('sort-asc', 'sort-desc');
+            th.removeAttribute('aria-sort');
             if (th.getAttribute('data-col') === state.adminSortBy) {
+                const dir = state.adminSortDesc ? 'descending' : 'ascending';
                 th.classList.add(state.adminSortDesc ? 'sort-desc' : 'sort-asc');
+                th.setAttribute('aria-sort', dir);
+            } else {
+                th.setAttribute('aria-sort', 'none');
             }
         });
+    }
+
+    function fetchAdminUsers() {
+        const tbody = document.getElementById('admin-users-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;"><div class="loader" style="margin: 1rem auto;"></div></td></tr>';
+
+        apiFetch(`${API_BASE}/users`)
+            .then(res => res.json())
+            .then(data => {
+                state.users = data;
+                renderAdminUsers();
+            })
+            .catch(err => {
+                console.warn('Kunde inte hämta användare:', err.message);
+                renderAdminUsers();
+            });
+    }
+
+    function renderAdminUsers() {
+        const tbody = document.getElementById('admin-users-tbody');
+        if (!tbody) return;
+
+        let sorted = [...state.users];
+        sorted.sort((a, b) => {
+            let v1 = a[state.adminUsersSortBy];
+            let v2 = b[state.adminUsersSortBy];
+            if (typeof v1 === 'string') v1 = v1.toLowerCase();
+            if (typeof v2 === 'string') v2 = v2.toLowerCase();
+            if (v1 < v2) return state.adminUsersSortDesc ? 1 : -1;
+            if (v1 > v2) return state.adminUsersSortDesc ? -1 : 1;
+            return 0;
+        });
+
+        if (sorted.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4">Inga användare hittades.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = sorted.map(user => `
+            <tr>
+                <td>${user.id}</td>
+                <td>${user.username || '-'}</td>
+                <td>${(user.role || 'USER').toUpperCase()}</td>
+                <td style="white-space: nowrap;">
+                    <button class="btn-icon edit-user-btn" data-id="${user.id}" data-name="${user.username}" title="Redigera">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                    </button>
+                    <button class="btn-icon danger delete-user-btn" data-id="${user.id}" data-name="${user.username}" title="Ta bort">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+        document.querySelectorAll('#admin-users-table th.sortable').forEach(th => {
+            th.classList.remove('sort-asc', 'sort-desc');
+            th.removeAttribute('aria-sort');
+            if (th.getAttribute('data-col') === state.adminUsersSortBy) {
+                const dir = state.adminUsersSortDesc ? 'descending' : 'ascending';
+                th.classList.add(state.adminUsersSortDesc ? 'sort-desc' : 'sort-asc');
+                th.setAttribute('aria-sort', dir);
+            } else {
+                th.setAttribute('aria-sort', 'none');
+            }
+        });
+    }
+
+    function fetchAdminBookings() {
+        if (state.cars.length === 0) {
+            fetchAdminCars();
+        }
+
+        const tbody = document.getElementById('admin-bookings-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;"><div class="loader" style="margin: 1rem auto;"></div></td></tr>';
+
+        apiFetch(`${API_BASE}/bookings`)
+            .then(res => res.json())
+            .then(data => {
+                state.bookings = data;
+                renderAdminBookings();
+            })
+            .catch(err => {
+                console.warn('Kunde inte hämta bokningar:', err.message);
+                renderAdminBookings();
+            });
+    }
+
+    function renderAdminBookings() {
+        const tbody = document.getElementById('admin-bookings-tbody');
+        if (!tbody) return;
+
+        let sorted = [...state.bookings];
+        sorted.sort((a, b) => {
+            const resolveValue = (item, key) => {
+                if (key === 'car') {
+                    const carObj = item.car || state.cars.find(c => c.id === item.carId);
+                    return carObj ? `${carObj.name || ''} ${carObj.model || ''}`.trim() : item.carId || '';
+                }
+                if (key === 'user') return item.user?.username || item.userId || '';
+                return item[key] || '';
+            };
+            let v1 = resolveValue(a, state.adminBookingsSortBy);
+            let v2 = resolveValue(b, state.adminBookingsSortBy);
+            if (typeof v1 === 'string') v1 = v1.toLowerCase();
+            if (typeof v2 === 'string') v2 = v2.toLowerCase();
+            if (v1 < v2) return state.adminBookingsSortDesc ? 1 : -1;
+            if (v1 > v2) return state.adminBookingsSortDesc ? -1 : 1;
+            return 0;
+        });
+
+        if (sorted.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6">Inga bokningar hittades.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = sorted.map(booking => {
+            const carObj = booking.car || state.cars.find(c => c.id === booking.carId);
+            const carInfo = carObj ? `${carObj.name || ''} ${carObj.model || ''}`.trim() : `Bil #${booking.carId}`;
+            const userInfo = booking.user ? booking.user.username : booking.userId || '-';
+            return `
+            <tr>
+                <td>${booking.id}</td>
+                <td>${carInfo}</td>
+                <td>${userInfo}</td>
+                <td>${booking.fromDate || '-'}</td>
+                <td>${booking.toDate || '-'}</td>
+                <td style="white-space: nowrap;">
+                    <button class="btn-icon edit-booking-btn" data-id="${booking.id}" title="Redigera">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                    </button>
+                    <button class="btn-icon danger delete-booking-btn" data-id="${booking.id}" title="Ta bort">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                </td>
+            </tr>
+        `;
+        }).join('');
+
+        document.querySelectorAll('#admin-bookings-table th.sortable').forEach(th => {
+            th.classList.remove('sort-asc', 'sort-desc');
+            th.removeAttribute('aria-sort');
+            if (th.getAttribute('data-col') === state.adminBookingsSortBy) {
+                const dir = state.adminBookingsSortDesc ? 'descending' : 'ascending';
+                th.classList.add(state.adminBookingsSortDesc ? 'sort-desc' : 'sort-asc');
+                th.setAttribute('aria-sort', dir);
+            } else {
+                th.setAttribute('aria-sort', 'none');
+            }
+        });
+    }
+
+    function fetchUserBookings() {
+        const tbody = document.getElementById('user-bookings-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;"><div class="loader" style="margin: 1rem auto;"></div></td></tr>';
+
+        if (!state.currentUser) {
+            tbody.innerHTML = '<tr><td colspan="4">Logga in för att se dina bokningar.</td></tr>';
+            return;
+        }
+
+        if (state.cars.length === 0) {
+            fetchAdminCars();
+        }
+
+        apiFetch(`${API_BASE}/bookings/me`)
+            .then(res => res.json())
+            .then(data => {
+                state.userBookings = data;
+                renderUserBookings();
+            })
+            .catch(err => {
+                console.warn('Kunde inte hämta dina bokningar:', err.message);
+                if (err.status === 404) {
+                    state.userBookings = [];
+                    const noBookingTbody = document.getElementById('user-bookings-tbody');
+                    if (noBookingTbody) {
+                        noBookingTbody.innerHTML = '<tr><td colspan="4">Du har inga bokningar.</td></tr>';
+                    }
+                } else {
+                    showToast('Kunde inte hämta bokningar.', 'error');
+                }
+            });
+    }
+
+    function renderUserBookings() {
+        const tbody = document.getElementById('user-bookings-tbody');
+        if (!tbody) return;
+        if (!state.currentUser) {
+            tbody.innerHTML = '<tr><td colspan="4">Logga in för att se dina bokningar.</td></tr>';
+            return;
+        }
+
+        const bookings = state.userBookings;
+
+        if (!bookings || bookings.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4">Du har inga bokningar.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = bookings.map(booking => {
+            const carObj = state.cars.find(c => c.id === booking.carId);
+            const carInfo = carObj ? `${carObj.name} ${carObj.model || ''}`.trim() : `Bil #${booking.carId}`;
+            return `
+            <tr>
+                <td>${booking.id}</td>
+                <td>${carInfo}</td>
+                <td>${booking.fromDate || '-'}</td>
+                <td>${booking.toDate || '-'}</td>
+            </tr>
+        `;
+        }).join('');
     }
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
