@@ -5,6 +5,7 @@
 :root {
     --bg: #212121;
     --bg-elevated: #2a2a2a;
+    --bg-elevated-hover: #222222;
     --bg-code: #111111;
 
     /* Funktionella färger */
@@ -1139,254 +1140,316 @@ th.sortable.sort-asc::after {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-   Bilkort (Car Cards) & Design 09 - The Table Spread
+   Bilkort (Car Cards) & Galleri
    ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── */
-.stage-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2.5rem;
-    width: 100%;
-    margin: 2rem 0;
+/* ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   Bilkort (Car Cards) & Galleri
+   ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── */
+.cars-hero {
+    max-width: 780px;
+    margin-bottom: 1.5rem;
 }
 
-/* Kort: Grund */
-.car-card {
-    width: var(--cw);
-    height: var(--ch);
-    background: #272727;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: absolute;
-    top: 0;
-    left: 0;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    will-change: transform, opacity;
-    backface-visibility: hidden;
-    transform-style: preserve-3d;
-}
-
-/* Bild-yta */
-.car-img {
-    height: 160px;
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.car-img svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-.car-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(0, 0, 0, .7);
-    border: 1px solid currentColor;
-    border-radius: 4px;
-    font-family: 'Teko', sans-serif;
-    font-size: .85rem;
-    letter-spacing: 1px;
-    padding: 2px 8px;
-    text-transform: uppercase;
-    backdrop-filter: blur(4px);
-}
-
-/* Innehåll */
-.car-body {
-    flex: 1;
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: .6rem;
-    position: relative;
-    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.2));
-}
-
-.car-name {
-    font-family: 'Teko', sans-serif;
-    font-size: 2rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    line-height: 1;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.car-price {
-    display: flex;
-    align-items: baseline;
-    gap: .35rem;
+.cars-note {
     color: var(--text-muted);
-    font-size: .85rem;
-    font-weight: 500;
-}
-
-.car-price strong {
-    color: var(--text);
-    font-size: 1.4rem;
-    font-weight: 700;
-}
-
-.car-feats {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: .4rem;
-    flex: 1;
+    max-width: 780px;
     margin-top: .5rem;
 }
 
-.car-feats li {
-    color: var(--text-muted);
-    font-size: .85rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.wigell-gallery {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
-.valj-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    border: none;
-    padding: 12px 0;
-    width: 100%;
-    margin-top: auto;
-    border-radius: 4px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: .85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    cursor: pointer;
-    transition: all var(--transition);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+.float-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition),
+              border-color var(--transition);
 }
 
-.valj-btn .dia {
-    width: 9px;
-    height: 9px;
-    transform: rotate(45deg);
-    flex-shrink: 0;
-    background: #1a1a1a;
-    transition: transform var(--transition);
+/* Disable hover effects on booked cards */
+.float-card:has(.float-card__cta--booked) {
+  cursor: not-allowed;
 }
 
-.valj-btn:hover {
-    filter: brightness(1.2);
-    transform: translateY(-2px);
+.float-card:hover:not(:has(.float-card__cta--booked)) {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
-.valj-btn:not(:disabled):hover .dia {
-    transform: rotate(225deg) scale(1.3);
+.float-card:hover:not(:has(.float-card__cta--booked)) .float-card__cta {
+  background: var(--accent-hover);
 }
 
-/* NAV kontroller */
-.card-ctrl {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    z-index: 100;
-    position: relative;
+.float-card:hover:not(:has(.float-card__cta--booked)) .float-card__cta::before {
+  transform: rotate(225deg) scale(1.3);
 }
 
-.cnav {
-    background: rgba(255, 255, 255, .05);
-    border: 1px solid var(--border);
-    color: var(--text);
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all var(--transition);
-    font-size: 1.2rem;
-    font-family: 'Teko', sans-serif;
-    backdrop-filter: blur(4px);
+.float-card--active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
-.cnav:hover {
-    background: var(--accent);
-    color: var(--bg);
-    border-color: var(--accent);
-    box-shadow: 0 0 20px rgba(230, 157, 103, 0.4);
+.float-card .car-img {
+  height: 180px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
 }
 
-.ccnt {
-    font-family: 'Teko', sans-serif;
-    font-size: 1.6rem;
-    letter-spacing: 3px;
-    color: var(--text-muted);
-    min-width: 60px;
-    text-align: center;
+.float-card .car-img svg,
+.float-card .car-img img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              filter 0.5s ease;
 }
 
-.ccnt em {
-    color: var(--accent);
-    font-style: normal;
+.float-card:hover:not(:has(.float-card__cta--booked)) .car-img svg,
+.float-card:hover:not(:has(.float-card__cta--booked)) .car-img img {
+  transform: translateY(-25px) scale(1.15);
+  filter: drop-shadow(0 20px 10px rgba(0, 0, 0, 0.5));
+}
+
+.float-card .car-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-family: 'Teko', sans-serif;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid currentColor;
+  z-index: 5;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-   WCAG AA/AAA Compliance & Accessibility
+   Footer
    ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── */
-
-/* WCAG AAA Contrast for Login Form */
-#login .panel {
-    background-color: #121212; /* High contrast background */
-    color: #ffffff; /* High contrast text */
-    border: 2px solid var(--accent);
+footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 2rem 1rem;
+  background: var(--bg);
 }
 
-#login .form-group > label {
-    color: #ffffff;
+footer p {
+  text-align: center;
+  max-width: 600px;
+}
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
-#login input[type="text"],
-#login input[type="password"] {
-    background: #121212;
-    border-bottom-color: #444;
-    color: #ffffff;
+.float-card__status {
+  display: none;
 }
 
-#login input[type="text"]::placeholder,
-#login input[type="password"]::placeholder {
-    color: rgba(255,255,255,0.7);
+.float-card .car-body {
+  padding: 1.5rem;
+  position: relative;
+  z-index: 2;
+  background: var(--bg-elevated);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  transition: background 0.5s ease;
 }
 
-/* Global Focus-Visible for Keyboard Navigation (WCAG AA) */
-*:focus-visible {
-    outline: 3px solid var(--accent) !important;
-    outline-offset: 3px !important;
-    box-shadow: 0 0 0 5px rgba(230, 157, 103, 0.3) !important;
+.float-card:hover:not(:has(.float-card__cta--booked)) .car-body {
+  background: var(--bg-elevated-hover);
 }
 
-/* Reduced Motion Preference */
+.float-card .car-title {
+  font-family: 'Teko', sans-serif;
+  font-size: 2.2rem;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.25rem;
+}
+
+.float-card .car-price {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.float-card .car-price strong {
+  font-size: 1.4rem;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.car-specs {
+  list-style: none;
+  padding: 0;
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: var(--color-function);
+}
+
+.car-specs li {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.car-specs li::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  background: currentColor;
+  transform: rotate(45deg);
+  display: block;
+  flex-shrink: 0;
+}
+
+.float-card__cta {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 12px 48px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition);
+  width: 100%;
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.float-card__cta::before {
+  content: '';
+  position: absolute;
+  left: 24px;
+  width: 10px;
+  height: 10px;
+  background: var(--bg);
+  transform: rotate(45deg);
+  transition: all var(--transition);
+}
+
+.float-card__cta:hover:not(:disabled)::before {
+  transform: rotate(225deg) scale(1.3);
+}
+
+.float-card__cta:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.float-card__cta--booked {
+  background: transparent;
+  color: var(--color-negative);
+  border: 1px solid var(--color-negative);
+  cursor: not-allowed;
+}
+
+.float-card__cta--booked::before {
+  background: var(--color-negative);
+}
+
+/* No hover effect on disabled booked button */
+.float-card__cta--booked:hover {
+  background: transparent;
+  color: var(--color-negative);
+}
+
+.float-card__cta--booked:hover::before {
+  background: var(--color-negative);
+}
+
+.float-card__cta:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.float-card:focus-within {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes floatCardIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.float-card {
+  animation: floatCardIn 0.4s ease both;
+}
+
+.float-card:nth-child(1)  { animation-delay: 0.00s; }
+.float-card:nth-child(2)  { animation-delay: 0.05s; }
+.float-card:nth-child(3)  { animation-delay: 0.10s; }
+.float-card:nth-child(4)  { animation-delay: 0.15s; }
+.float-card:nth-child(5)  { animation-delay: 0.20s; }
+.float-card:nth-child(6)  { animation-delay: 0.25s; }
+.float-card:nth-child(7)  { animation-delay: 0.30s; }
+.float-card:nth-child(8)  { animation-delay: 0.35s; }
+.float-card:nth-child(9)  { animation-delay: 0.40s; }
+.float-card:nth-child(10) { animation-delay: 0.45s; }
+.float-card:nth-child(11) { animation-delay: 0.50s; }
+.float-card:nth-child(12) { animation-delay: 0.55s; }
+
 @media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-    
-    /* Ensure loaders degrade gracefully when animations are disabled */
-    .loader {
-        animation: none !important;
-        border: 2px solid var(--accent);
-        transform: rotate(45deg);
-    }
+  .float-card,
+  .float-card:hover {
+    animation: none;
+    transform: none;
+  }
+  .float-card .car-img svg,
+  .float-card .car-img img,
+  .float-card:hover .car-img svg,
+  .float-card:hover .car-img img {
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+  .float-card .car-body {
+    transition: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .float-card {
+    scroll-snap-align: center;
+    min-width: 80vw;
+  }
+
+  .float-card:not(.float-card--active) .car-img svg,
+  .float-card:not(.float-card--active) .car-img img {
+    transform: none;
+    filter: none;
+  }
 }

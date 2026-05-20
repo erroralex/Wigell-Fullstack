@@ -21,7 +21,6 @@ const state = {
 };
 
 const API_BASE = 'http://localhost:8080/api/v1';
-let carToDeleteId = null;
 
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 // SESSION PERSISTENCE
@@ -121,7 +120,7 @@ window.addEventListener('load', () => {
         const navCars = document.getElementById('nav-cars');
         const navMinaSidor = document.getElementById('nav-mina-sidor');
 
-        // Admin-länkar
+        // ─── ADMIN-LÄNKAR ────────────────────────────────────────────────────────────────────────────────────────────────────
         const navAdmin = document.getElementById('nav-admin');
         const navStyleguide = document.getElementById('nav-styleguide');
 
@@ -198,7 +197,7 @@ window.addEventListener('load', () => {
     };
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // GLOBAL EVENT DELEGATION (Klick-lyssnare för hela sidan)
+    // GLOBALA KLICK-LYSSNARE
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     document.body.addEventListener('click', (e) => {
 
@@ -237,7 +236,7 @@ window.addEventListener('load', () => {
             }
         }
 
-        // Visa/Dölj Kodblock
+        // ─── VISA/DÖLJ KODBLOCK ──────────────────────────────────────────────────────────────────────────────────────────────
         if (e.target.classList.contains('toggle-code-btn')) {
             const codeWrapper = e.target.nextElementSibling;
             if (codeWrapper) {
@@ -246,7 +245,7 @@ window.addEventListener('load', () => {
             }
         }
 
-        // Tabellsortering för bil-listan
+        // ─── TABELLSORTERING FÖR BIL-LISTAN ──────────────────────────────────────────────────────────────────────────────────
         const carTh = e.target.closest('#cars-table th.sortable');
         if (carTh) {
             const col = carTh.getAttribute('data-col');
@@ -259,7 +258,7 @@ window.addEventListener('load', () => {
             renderCars();
         }
 
-        // Tabellsortering för admin-bilar
+        // ─── TABELLSORTERING FÖR ADMIN-BILAR ─────────────────────────────────────────────────────────────────────────────────
         const adminCarTh = e.target.closest('#admin-cars-table th.sortable');
         if (adminCarTh) {
             const col = adminCarTh.getAttribute('data-col');
@@ -272,7 +271,7 @@ window.addEventListener('load', () => {
             renderAdminCars();
         }
 
-        // Tabellsortering för admin-användare
+        // ─── TABELLSORTERING FÖR ADMIN-ANVÄNDARE ─────────────────────────────────────────────────────────────────────────────
         const adminUserTh = e.target.closest('#admin-users-table th.sortable');
         if (adminUserTh) {
             const col = adminUserTh.getAttribute('data-col');
@@ -285,7 +284,7 @@ window.addEventListener('load', () => {
             renderAdminUsers();
         }
 
-        // Tabellsortering för admin-bokningar
+        // ─── TABELLSORTERING FÖR ADMIN-BOOKINGAR ─────────────────────────────────────────────────────────────────────────────
         const adminBookingTh = e.target.closest('#admin-bookings-table th.sortable');
         if (adminBookingTh) {
             const col = adminBookingTh.getAttribute('data-col');
@@ -298,9 +297,10 @@ window.addEventListener('load', () => {
             renderAdminBookings();
         }
 
-        // BOKNING - Öppna modal
-        const bookBtn = e.target.closest('.book-car-btn');
-        if (bookBtn) {
+        // ─── BOKNING - ÖPPNA MODAL ───────────────────────────────────────────────────────────────────────────────────────────
+        const card = e.target.closest('.float-card');
+        const bookBtn = e.target.closest('.book-car-btn') || (card ? card.querySelector('.book-car-btn') : null);
+        if (bookBtn && !bookBtn.disabled) {
             if (!state.currentUser) {
                 showToast('Du måste vara inloggad för att boka.', 'error');
                 navigateTo('login');
@@ -320,8 +320,8 @@ window.addEventListener('load', () => {
             const bookingModal = document.getElementById('booking-modal');
             if (bookingModal) bookingModal.showModal();
         }
-
-        // ADMIN - Öppna "Lägg till bil"-modal
+        
+        // ─── ADMIN - ÖPPNA "Lägg till bil"-modal ─────────────────────────────────────────────────────────────────────────────
         const openAddCarBtn = e.target.closest('#open-add-car-btn');
         if (openAddCarBtn) {
             document.getElementById('edit-car-id').value = '';
@@ -334,8 +334,8 @@ window.addEventListener('load', () => {
             const addCarModal = document.getElementById('add-car-modal');
             if (addCarModal) addCarModal.showModal();
         }
-
-        // ADMIN - Redigera Bil
+        
+        // ─── ADMIN - REDIGERA BIL ────────────────────────────────────────────────────────────────────────────────────────────
         const editCarBtn = e.target.closest('.edit-car-btn');
         if (editCarBtn) {
             const carId = editCarBtn.getAttribute('data-id');
@@ -361,12 +361,20 @@ window.addEventListener('load', () => {
         // ADMIN - Ta bort bil
         const deleteCarBtn = e.target.closest('.delete-car-btn');
         if (deleteCarBtn) {
-            carToDeleteId = deleteCarBtn.getAttribute('data-id');
+            const carId = deleteCarBtn.getAttribute('data-id');
             const carName = deleteCarBtn.getAttribute('data-name');
-            document.getElementById('delete-car-name').innerText = carName;
 
-            const deleteModal = document.getElementById('delete-confirm-modal');
-            if (deleteModal) deleteModal.showModal();
+            showConfirmModal({
+                title: 'Ta bort bil',
+                message: `Vill du verkligen ta bort ${carName}? Denna åtgärd kan inte ångras.`,
+                confirmLabel: 'Ja, ta bort',
+                onConfirm: async () => {
+                    await apiFetch(`${API_BASE}/cars/${carId}`, {method: 'DELETE'});
+                    showToast('Bilen har tagits bort från systemet', 'success');
+                    fetchAdminCars();
+                    fetchCars();
+                }
+            });
         }
 
         // ADMIN - Redigera användare
@@ -391,13 +399,17 @@ window.addEventListener('load', () => {
         if (deleteUserBtn) {
             const userId = deleteUserBtn.getAttribute('data-id');
             const userName = deleteUserBtn.getAttribute('data-name');
-            if (!confirm(`Vill du verkligen ta bort användaren ${userName}?`)) return;
-            apiFetch(`${API_BASE}/users/${userId}`, {method: 'DELETE'})
-                .then(() => {
+
+            showConfirmModal({
+                title: 'Ta bort användare',
+                message: `Vill du verkligen ta bort användaren ${userName}?`,
+                confirmLabel: 'Ja, ta bort',
+                onConfirm: async () => {
+                    await apiFetch(`${API_BASE}/users/${userId}`, {method: 'DELETE'});
                     showToast('Användaren togs bort', 'success');
                     fetchAdminUsers();
-                })
-                .catch(() => showToast('Kunde inte ta bort användaren', 'error'));
+                }
+            });
         }
 
         // ADMIN - Redigera bokning
@@ -418,14 +430,18 @@ window.addEventListener('load', () => {
         const deleteBookingBtn = e.target.closest('.delete-booking-btn');
         if (deleteBookingBtn) {
             const bookingId = deleteBookingBtn.getAttribute('data-id');
-            if (!confirm('Vill du verkligen ta bort bokningen?')) return;
-            apiFetch(`${API_BASE}/bookings/${bookingId}`, {method: 'DELETE'})
-                .then(() => {
+
+            showConfirmModal({
+                title: 'Ta bort bokning',
+                message: 'Vill du verkligen ta bort bokningen?',
+                confirmLabel: 'Ja, ta bort',
+                onConfirm: async () => {
+                    await apiFetch(`${API_BASE}/bookings/${bookingId}`, {method: 'DELETE'});
                     showToast('Bokningen togs bort', 'success');
                     fetchAdminBookings();
                     fetchUserBookings();
-                })
-                .catch(() => showToast('Kunde inte ta bort bokningen', 'error'));
+                }
+            });
         }
     });
 
@@ -437,38 +453,47 @@ window.addEventListener('load', () => {
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     // DELETE MODAL - Hantera Bekräfta och Avbryt
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-    const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+    const confirmActionModal = document.getElementById('confirm-action-modal');
+    const confirmActionTitle = document.getElementById('confirm-action-title');
+    const confirmActionMessage = document.getElementById('confirm-action-message');
+    const confirmActionBtn = document.getElementById('confirm-action-btn');
+    const cancelActionBtn = document.getElementById('cancel-action-btn');
+    let confirmActionCallback = null;
 
-    if (cancelDeleteBtn) {
-        cancelDeleteBtn.addEventListener('click', () => {
-            if (deleteConfirmModal) deleteConfirmModal.close();
-            carToDeleteId = null;
+    function showConfirmModal({title, message, confirmLabel = 'Ja, fortsätt', onConfirm}) {
+        if (!confirmActionModal || !confirmActionTitle || !confirmActionMessage || !confirmActionBtn) return;
+        confirmActionTitle.textContent = title;
+        confirmActionMessage.textContent = message;
+        confirmActionBtn.textContent = confirmLabel;
+        confirmActionBtn.disabled = false;
+        confirmActionCallback = onConfirm;
+        confirmActionModal.showModal();
+    }
+
+    if (confirmActionBtn) {
+        confirmActionBtn.addEventListener('click', async () => {
+            if (!confirmActionCallback) return;
+            confirmActionBtn.disabled = true;
+            const originalLabel = confirmActionBtn.textContent;
+            confirmActionBtn.textContent = 'Vänta...';
+
+            try {
+                await confirmActionCallback();
+            } catch (err) {
+                console.error(err);
+            } finally {
+                if (confirmActionModal) confirmActionModal.close();
+                confirmActionCallback = null;
+                confirmActionBtn.textContent = originalLabel;
+                confirmActionBtn.disabled = false;
+            }
         });
     }
 
-    if (confirmDeleteBtn) {
-        confirmDeleteBtn.addEventListener('click', async (e) => {
-            if (!carToDeleteId) return;
-
-            const btn = e.target;
-            btn.disabled = true;
-            btn.textContent = 'Tar bort...';
-
-            try {
-                await apiFetch(`${API_BASE}/cars/${carToDeleteId}`, {method: 'DELETE'});
-                showToast('Bilen har tagits bort från systemet', 'success');
-                if (deleteConfirmModal) deleteConfirmModal.close();
-                fetchAdminCars();
-                fetchCars();
-            } catch (err) {
-                showToast('Kunde inte ta bort bilen', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Ja, ta bort';
-                carToDeleteId = null;
-            }
+    if (cancelActionBtn) {
+        cancelActionBtn.addEventListener('click', () => {
+            if (confirmActionModal) confirmActionModal.close();
+            confirmActionCallback = null;
         });
     }
 
@@ -926,30 +951,96 @@ window.addEventListener('load', () => {
     }
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // CAR RENTAL LOGIC (STANDARD GRID)
+    // CAR RENTAL LOGIC (STANDARD GALLERY)
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     function fetchCars() {
-        const carsBody = document.getElementById('cars-tbody');
-        if (carsBody) carsBody.innerHTML = '<tr><td colspan="5" style="text-align: center;"><div class="loader" style="margin: 2rem auto;"></div></td></tr>';
+        const carsContainer = document.getElementById('cars-container');
+        if (carsContainer) {
+            carsContainer.innerHTML = '<div class="loader" style="margin: 2rem auto;"></div>';
+        }
 
         apiFetch(`${API_BASE}/cars`)
             .then(res => res.json())
             .then(data => {
                 state.cars = data;
-                renderCars();
+                renderGallery();
             })
             .catch(err => {
                 console.warn('Kunde inte hämta bilar:', err.message);
                 showToast('Kunde inte nå servern.', 'error');
-                renderCars();
+                state.cars = [];
+                renderGallery();
             });
     }
 
-    function renderCars() {
-        const tbody = document.getElementById('cars-tbody');
-        if (!tbody) return;
+    function buildFloatCard(car) {
+        const imageSrc = car.imageUrl || car.image || '';
+        const hasImage = Boolean(imageSrc);
+        const modelName = [car.name, car.model].filter(Boolean).join(' ');
 
-        let sorted = [...state.cars];
+        const imgContent = car.image
+            ? `<img src="data:image/png;base64,${car.image}"
+                    alt="Foto av ${car.name}${car.model ? ' ' + car.model : ''}"
+                    style="width:80%;height:80%;object-fit:contain;">`
+            : renderPlaceholderSVG('#e69d67');
+
+        const feats = [car.feature1, car.feature2, car.feature3].filter(Boolean);
+        const specsHTML = feats.length
+            ? `<ul class="car-specs">
+                 ${feats.map(f => `<li>${f}</li>`).join('')}
+               </ul>`
+            : '';
+
+        const ctaBtn = car.booked
+            ? `<button class="float-card__cta float-card__cta--booked"
+                       disabled aria-disabled="true">
+                 BOKAD
+               </button>`
+            : `<button class="float-card__cta book-car-btn"
+                       data-id="${car.id}"
+                       data-name="${(car.name + ' ' + (car.model || '')).trim()}"
+                       aria-label="Boka ${car.name}${car.model ? ' ' + car.model : ''}">
+                 BOKA
+               </button>`;
+
+        return `
+            <article class="float-card" aria-label="${car.name}${car.model ? ' ' + car.model : ''} – ${car.type || 'Okänd typ'}">
+              <div class="car-badge"
+                   style="color:var(--color-function); border-color:var(--color-function);">
+                ${car.type || 'Okänd'}
+              </div>
+
+              <div class="car-img">
+                ${imgContent}
+              </div>
+
+              <div class="car-body">
+                <div class="car-title" style="color:var(--accent);">
+                  ${car.name.toUpperCase()}${car.model ? ' ' + car.model.toUpperCase() : ''}
+                </div>
+                <div class="car-price">
+                  <strong>${car.price.toLocaleString('sv-SE')}</strong> kr/dag
+                </div>
+                ${specsHTML}
+                ${ctaBtn}
+              </div>
+            </article>`;
+    }
+
+    function renderGallery() {
+        const container = document.getElementById('cars-container');
+        if (!container) return;
+
+        if (!state.cars || state.cars.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>Inga bilar tillgängliga just nu. Försök igen senare eller kontakta support.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const sorted = [...state.cars];
         sorted.sort((a, b) => {
             let v1 = a[state.carSortBy];
             let v2 = b[state.carSortBy];
@@ -960,37 +1051,7 @@ window.addEventListener('load', () => {
             return 0;
         });
 
-        if (sorted.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5">Inga bilar tillgängliga.</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = sorted.map(car => `
-            <tr>
-                <td><strong>${car.name}</strong> ${car.model || ''}</td>
-                <td>${car.type || 'Okänd'}</td>
-                <td>${car.price} kr/dag</td>
-                <td>${car.booked ? '<span style="color: var(--color-negative);">Bokad</span>' : '<span style="color: var(--color-positive);">Ledig</span>'}</td>
-                <td style="white-space: nowrap;">
-                    ${car.booked ?
-                        '<button class="btn btn-negative" disabled>Bokad</button>' :
-                        `<button class="btn btn-primary book-car-btn" data-id="${car.id}" data-name="${car.name} ${car.model || ''}">Välj</button>`
-                    }
-                </td>
-            </tr>
-        `).join('');
-
-        document.querySelectorAll('#cars-table th.sortable').forEach(th => {
-            th.classList.remove('sort-asc', 'sort-desc');
-            th.removeAttribute('aria-sort');
-            if (th.getAttribute('data-col') === state.carSortBy) {
-                const dir = state.carSortDesc ? 'descending' : 'ascending';
-                th.classList.add(state.carSortDesc ? 'sort-desc' : 'sort-asc');
-                th.setAttribute('aria-sort', dir);
-            } else {
-                th.setAttribute('aria-sort', 'none');
-            }
-        });
+        container.innerHTML = sorted.map(buildFloatCard).join('');
     }
 
 
