@@ -77,8 +77,12 @@ public class SecurityConfig {
 
                         // Bokningsrelaterade endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/bookings").hasRole("USER") //Testad
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/bookings/**").hasRole("ADMIN") //Testad
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/bookings/**").hasRole("ADMIN") //Testad
+                        // .requestMatchers(HttpMethod.PUT, "/api/v1/bookings/**").hasRole("ADMIN") //Testad
+                        // .requestMatchers(HttpMethod.DELETE, "/api/v1/bookings/**").hasRole("ADMIN") //Testad
+
+                        // OBS! Alex - Ändrad så att användare kan ta bort egen bokning
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/bookings/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/bookings/**").authenticated()
 
 
                         // Alla övriga endpoints kräver autentisering

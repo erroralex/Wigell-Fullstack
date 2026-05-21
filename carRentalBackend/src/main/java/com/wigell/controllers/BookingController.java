@@ -167,6 +167,8 @@ public class BookingController {
      *         eller 404 NOT_FOUND om bokningen inte kunde hittas.
      */
     //Testad
+    // Alex - Kund kan nu returnera bokning
+    @PreAuthorize("@bookingService.getBookingById(#id).orElse(null)?.userId == principal.id or hasRole('ROLE_ADMIN')")
     @PutMapping("/return/{id}")
     public ResponseEntity<Booking> returnCar(@PathVariable long id) {
         try {
@@ -189,6 +191,8 @@ public class BookingController {
      *         annars INTERNAL_SERVER_ERROR vid fel.
      */
     //Testad
+    // Alex - Kund kan nu ta bort egen bokning
+    @PreAuthorize("@bookingService.getBookingById(#id).orElse(null)?.userId == principal.id or hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
         try {

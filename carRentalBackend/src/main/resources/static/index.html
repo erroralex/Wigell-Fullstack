@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
+    
+    <a href="#main-content" class="skip-link">Hoppa till innehåll</a>
 
 
 <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
@@ -30,7 +32,8 @@
     </a>
 
     <nav class="nav-links">
-        <div class="example-nav-item" id="nav-admin" style="display: none;">
+        <a href="#cars" class="nav-link active" id="nav-cars">Hyrbilar</a>
+        <div class="example-nav-item d-none" id="nav-admin">
             <a href="#admin-cars" class="nav-link">Administration</a>
             <div class="sub-nav">
                 <a href="#admin-cars" class="sub-link">Bilar</a>
@@ -39,12 +42,7 @@
             </div>
         </div>
 
-        <a href="#cars" class="nav-link active" id="nav-cars">Bilar</a>
-        <a href="#mina-sidor" class="nav-link" id="nav-mina-sidor" style="display: none;">Mina Sidor</a>
-
-        <a href="#login" class="nav-link" id="nav-login">Logga In</a>
-
-        <div class="example-nav-item" id="nav-styleguide" style="display: none;">
+        <div class="example-nav-item d-none" id="nav-styleguide">
             <a href="#admin-styleguide" class="nav-link">Styleguide</a>
             <div class="sub-nav">
                 <a href="#branding" class="sub-link">Typografi & Färg</a>
@@ -55,7 +53,26 @@
             </div>
         </div>
 
-        <a href="#logout" class="nav-link" id="nav-logout" style="display: none;">Logga Ut</a>
+        <a href="#login" class="nav-link" id="nav-login">Logga in</a>
+
+        <!-- Profil-dropdown visas när användaren är inloggad -->
+        <div class="example-nav-item d-none" id="nav-profile" role="navigation" aria-label="Profilmeny">
+            <a href="#" class="nav-link" id="nav-profile-trigger" aria-haspopup="true" aria-expanded="false">
+                <i class="bi bi-person-circle icon-sm" aria-hidden="true"></i>
+                <span id="nav-profile-name">Profil</span>
+            </a>
+            <div class="sub-nav" id="nav-profile-submenu">
+                <a href="#mina-sidor" class="sub-link" id="nav-mina-sidor-sub">
+                    <i class="bi bi-calendar3" aria-hidden="true"></i>
+                    Mina Sidor
+                </a>
+                <a href="#logout" class="sub-link">
+                    <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                    Logga Ut
+                </a>
+            </div>
+        </div>
+
     </nav>
     <button class="hamburger" id="hamburger" aria-label="Öppna meny" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -63,7 +80,8 @@
 </header>
 
 
-<main>
+
+<main id="main-content">
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
     <!-- Sektion: BILUTHYRNING -->
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
@@ -74,18 +92,27 @@
             <p class="cars-note">Våra bilar presenteras i ett lättöverskådligt galleri. Klicka på "Boka nu" för att slutföra bokningen.</p>
         </div>
 
+        <!-- Sorteringskontroller för bilgalleri -->
+        <div class="sort-toolbar" role="group" aria-label="Sortera bilarna">
+            <span class="sort-toolbar__label">Sortera:</span>
+            <button class="btn btn-generic sort-cars-btn active-sort" data-sort="name" aria-pressed="true">Namn</button>
+            <button class="btn btn-generic sort-cars-btn" data-sort="type" aria-pressed="false">Typ</button>
+            <button class="btn btn-generic sort-cars-btn" data-sort="price" aria-pressed="false">Pris</button>            
+        </div>
+
         <div id="cars-container" class="wigell-gallery" aria-live="polite">
             <!-- Bilkort laddas här -->
         </div>
     </section>
 
 
+
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
     <!-- Sektion: LOGGA IN -->
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
     <section id="login" class="page-section">
-        <h2>Logga In</h2>
-        <div class="panel panel-accent" id="#loggain" style="max-width: 500px; margin: 0 auto;">
+        <h2>Logga in</h2>
+        <div class="panel panel-accent login-panel">
             <form id="login-form">
                 <div class="form-group">
                     <label for="username">Användarnamn</label>
@@ -95,15 +122,21 @@
                     <label for="password">Lösenord</label>
                     <input type="password" id="password" required>
                 </div>
-                <p id="login-error" role="alert" aria-live="assertive" style="color: var(--color-negative); display: none; margin-bottom: 1rem;">Felaktigt
+                <p id="login-error" role="alert" aria-live="assertive" class="text-negative d-none mb-1">Felaktigt
                     användarnamn eller lösenord.</p>
-                <button type="submit" class="btn btn-primary">Logga In</button>
+                <button type="submit" class="btn btn-primary">Logga in</button>
                 <button type="button" class="btn btn-secondary" id="open-register-btn">Skapa konto</button>
             </form>
         </div>
     </section>
 
+
+
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <!-- Dialog: SKAPA KONTO -->
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
     <dialog id="register-modal" class="panel" role="dialog" aria-modal="true" aria-labelledby="register-title">
+        <div class="dialog-body">
         <h3 id="register-title">Skapa konto</h3>
         <form id="register-form">
             <div class="form-group">
@@ -136,12 +169,14 @@
                 <input type="password" id="register-password" required />
             </div>
 
-            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <div class="dialog-actions">
                 <button type="submit" class="btn btn-primary">Skapa konto</button>
                 <button type="button" class="btn btn-negative" id="close-register-btn">Avbryt</button>
             </div>
         </form>
+        </div>
     </dialog>
+
 
 
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
@@ -151,7 +186,7 @@
         <h2>Admin - Bilar</h2>
 
         <!-- Knapp för att öppna modalen -->
-        <button id="open-add-car-btn" class="btn btn-positive" style="margin-bottom: 2rem;">Lägg till ny bil</button>
+        <button id="open-add-car-btn" class="btn btn-positive mb-2">Lägg till ny bil</button>
 
         <p>Hantering av systemdata. Sortera genom att klicka på kolumnrubrikerna.</p>
         <div class="table-responsive">
@@ -167,13 +202,14 @@
                 </tr>
                 </thead>
                 <tbody id="admin-cars-tbody">
-                <!-- Admin car data loaded here -->
+                <!-- Här laddas tabellen av bilar in -->
                 </tbody>
             </table>
         </div>
     </section>
 
 
+    
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
     <!-- Sektion: MINA SIDOR -->
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
@@ -188,15 +224,19 @@
                     <th>Bil</th>
                     <th>Startdatum</th>
                     <th>Slutdatum</th>
+                    <th>Status</th>
+                    <th>Åtgärd</th>
                 </tr>
                 </thead>
                 <tbody id="user-bookings-tbody">
-                <!-- User bookings data loaded here -->
+                <!-- Här laddas tabellen av bokningar in -->
                 </tbody>
             </table>
         </div>
     </section>
 
+    
+    
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
     <!-- Sektion: ADMIN - ANVÄNDARE -->
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
@@ -209,16 +249,22 @@
                 <tr>
                     <th class="sortable" data-col="id">ID</th>
                     <th class="sortable" data-col="username">Användarnamn</th>
+                    <th class="sortable" data-col="firstName">Förnamn</th>
+                    <th class="sortable" data-col="lastName">Efternamn</th>
+                    <th class="sortable" data-col="email">E-post</th>
+                    <th class="sortable" data-col="noOfOrders">Bokningar</th>
                     <th class="sortable" data-col="role">Roll</th>
                     <th>Åtgärder</th>
                 </tr>
                 </thead>
                 <tbody id="admin-users-tbody">
-                <!-- Admin users data loaded here -->
+                <!-- Här laddas tabellen av användare in -->
                 </tbody>
             </table>
         </div>
     </section>
+
+
 
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
     <!-- Sektion: ADMIN - BOKNINGAR -->
@@ -235,11 +281,12 @@
                     <th class="sortable" data-col="user">Användare</th>
                     <th class="sortable" data-col="startDate">Startdatum</th>
                     <th class="sortable" data-col="endDate">Slutdatum</th>
+                    <th>Status</th>
                     <th>Åtgärder</th>
                 </tr>
                 </thead>
                 <tbody id="admin-bookings-tbody">
-                <!-- Admin bookings data loaded here -->
+                <!-- Här laddas tabellen av bokningar in -->
                 </tbody>
             </table>
         </div>
@@ -250,10 +297,9 @@
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
     <section id="admin-styleguide" class="page-section">
         <div class="hero">
-            <h1><span class="brand-logo brand-logo--static"
-                      style="display: inline-flex; font-size: inherit; padding-top: 0;"><span
+            <h1><span class="brand-logo brand-logo--static inline-flex font-size-inherit pt-0"><span
                     class="w">W</span><span class="i-dot">I</span><span class="rest">GELL</span></span><br/><span
-                    style="color: var(--accent)">Styleguide</span></h1>
+                    class="text-accent">Styleguide</span></h1>
             <p>Välkommen till Wigellkoncernens designsystem. Här hittar du den grafiska profilen, UI-komponenter och
                 kodexempel – allt som behövs för att utveckla skalbara, enhetliga och moderna applikationer inom
                 hela koncernen.</p>
@@ -282,7 +328,7 @@
         </div>
 
         <!-- Typografi -->
-        <h3 style="margin-top: 3rem">Typografi</h3>
+        <h3 class="mt-3">Typografi</h3>
         <p>Rubriker använder <strong>Teko</strong> (versaler, litet radavstånd)
             och brödtext använder <strong>Space Grotesk</strong> (lättläst, dämpat vit).</p>
 
@@ -336,20 +382,19 @@
           </code></pre>
             </div>
         </div>
-
+                
         <!-- Logo -->
-        <h3 style="margin-top: 3rem">Wigell Logotyp</h3>
+        <h3 class="mt-3">Wigell Logotyp</h3>
 
         <p>Logotypen är uppbyggd med text och en CSS-renderad "slips-form" som ersätter I:et,
             med en diamant som prick ovanpå. I navigeringen animeras dessa vid hovring.
             Klassen <code>.brand-logo--static</code> används när logotypen visas utan animering.</p>
 
-        <div class="panel-discrete"
-             style="display: flex; flex-direction: column; align-items: center; gap: 3rem; padding: 4rem">
+        <div class="panel-discrete d-flex flex-column align-center gap-3 p-4">
 
             <!-- Interaktiv variant - hovra för att se animering -->
             <div>
-                <p style="text-align: center; margin-bottom: 1rem; font-size: 0.85rem;">Interaktiv — Hovra för
+                <p class="text-center text-sm mb-1">Interaktiv — Hovra för
                     animering</p>
                 <div class="brand-logo">
                     <span class="w">W</span><span class="i-dot">I</span><span class="rest">GELL</span>
@@ -358,7 +403,7 @@
 
             <!-- Statisk variant - ingen animering -->
             <div>
-                <p style="text-align: center; margin-bottom: 1rem; font-size: 0.85rem;">Statisk — ingen animering</p>
+                <p class="text-center text-sm mb-1">Statisk — ingen animering</p>
                 <div class="brand-logo brand-logo--static">
                     <span class="w">W</span><span class="i-dot">I</span><span class="rest">GELL</span>
                 </div>
@@ -456,7 +501,7 @@
         <p>Välj stil baserat på handlingens syfte. Diamant-ikonen
             animeras vid hovring på alla varianter där den förekommer.</p>
 
-        <div class="panel-discrete btn-demo" style="display: flex; gap: 1rem; flex-wrap: wrap">
+        <div class="panel-discrete btn-demo d-flex gap-1 flex-wrap">
             <button class="btn btn-generic">Generisk / Diskret</button>
             <button class="btn btn-secondary">Standard (Sekundär)</button>
             <button class="btn btn-primary">Standard (Primär)</button>
@@ -558,7 +603,7 @@
         </div>
 
         <!-- Navigering med undersidor -->
-        <h3 style="margin-top: 3rem">Navigering med Undersidor</h3>
+        <h3 class="mt-3">Navigering med Undersidor</h3>
         <p>Hovra över "Uthyrning" för att se undermenyn. Undersidor visas som en
             dropdown med samma diamant-estetik som övrig navigering.</p>
 
@@ -663,11 +708,11 @@
         </div>
 
         <!-- Innehållspaneler -->
-        <h3 style="margin-top: 3rem">Innehållspaneler</h3>
+        <h3 class="mt-3">Innehållspaneler</h3>
         <p>Används för informationsgruppering eller statusblock. Diamanten
             överst fylls med panelens färgkategori när användaren hovrar över ytan.</p>
 
-        <div class="panel-discrete" style="display: flex; flex-direction: column; gap: 2rem; padding-top: 3rem">
+        <div class="panel-discrete d-flex flex-column gap-3 mt-3">
             <div class="panel panel-accent">
                 <h4>Accent Panel</h4>
                 <p>Framhäver viktig information med Wigells primärfärg. Används sparsamt.</p>
@@ -780,6 +825,87 @@
         </code></pre>
             </div>
         </div>
+
+        <h3 class="mt-3">Dialogrutor (Modaler)</h3>
+        <p>Inbyggda HTML5 <code>&lt;dialog&gt;</code>-element formaterade som Wigell-paneler. Använd modifieringsklasser (t.ex. <code>.panel-neutral</code> eller <code>.panel-negative</code>) på dialog-taggen för att sätta temat. Säkerställer native centrering, mobilanpassade knappar och WCAG AA-kompatibel scrollning vid zoom.</p>
+
+        <div class="panel-discrete">
+            <button class="btn btn-primary demo-modal-trigger" data-target="demo-modal-neutral">Öppna Neutral Demo</button>
+            <button class="btn btn-negative demo-modal-trigger" data-target="demo-modal-negative">Öppna Negativ Demo</button>
+            
+            <dialog id="demo-modal-neutral" class="panel panel-neutral" role="dialog" aria-modal="true" aria-labelledby="demo-modal-neutral-title">
+                <div class="dialog-body">
+                    <h3 id="demo-modal-neutral-title">Systemåtgärd</h3>
+                    <p>Detta är ett modulärt modalfönster som följer styleguiden. Klicka på avbryt för att stänga.</p>
+                    <form method="dialog">
+                        <div class="dialog-actions">
+                            <button type="submit" class="btn btn-positive">Bekräfta</button>
+                            <button type="submit" class="btn btn-secondary">Avbryt</button>
+                        </div>
+                    </form>
+                </div>
+            </dialog>
+
+            <dialog id="demo-modal-negative" class="panel panel-negative" role="dialog" aria-modal="true" aria-labelledby="demo-modal-negative-title">
+                <div class="dialog-body">
+                    <h3 id="demo-modal-negative-title">Varning</h3>
+                    <p>Detta är ett negativt modalfönster. Klicka på avbryt för att stänga.</p>
+                    <form method="dialog">
+                        <div class="dialog-actions">
+                            <button type="submit" class="btn btn-negative">Ta bort</button>
+                            <button type="submit" class="btn btn-secondary">Avbryt</button>
+                        </div>
+                    </form>
+                </div>
+            </dialog>
+        </div>
+
+        <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
+        <div class="code-wrapper">
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera HTML</button>
+                <pre><code>
+                &lt;dialog id="demo-modal-neutral" class="panel panel-neutral" role="dialog" aria-modal="true" aria-labelledby="demo-modal-neutral-title"&gt;
+                    &lt;div class="dialog-body"&gt;
+                        &lt;h3 id="demo-modal-neutral-title"&gt;Systemåtgärd&lt;/h3&gt;
+                        &lt;p&gt;Modulärt innehåll här.&lt;/p&gt;
+                        
+                        &lt;form method="dialog"&gt;
+                            &lt;div class="dialog-actions"&gt;
+                                &lt;button type="submit" class="btn btn-positive"&gt;Bekräfta&lt;/button&gt;
+                                &lt;button type="submit" class="btn btn-secondary"&gt;Avbryt&lt;/button&gt;
+                            &lt;/div&gt;
+                        &lt;/form&gt;
+                    &lt;/div&gt;
+                &lt;/dialog&gt;
+                
+                &lt;!-- JS trigger för att öppna --&gt;
+                &lt;script&gt;
+                    document.getElementById('demo-modal-neutral').showModal();
+                &lt;/script&gt;                                
+                </code></pre>
+            </div>
+
+            <div class="code-snippet">
+                <button class="copy-btn">Kopiera CSS</button>
+                <pre><code>
+                /* Huvudbehållaren tillåter bleeding (overflow: visible) */
+                dialog[open] {
+                    overflow: visible; 
+                    padding: 0 !important; 
+                }
+                
+                /* Innehållsbehållaren hanterar scroll och padding */
+                .dialog-body {
+                    padding: 2rem 1.5rem 1.5rem;
+                    max-height: calc(100vh - 2rem);
+                    overflow-y: auto;
+                    overscroll-behavior: contain;
+                }
+                </code></pre>
+            </div>
+        </div>
+
     </section>
 
     <!-- ─── FORMULÄR & TABELLER ────────────────────────────────────────────────────────────────────────────────────────────── -->
@@ -793,13 +919,13 @@
         <p>Textfält har en subtil underlinje som lyser upp vid fokus.
             Radioknappar och kryssrutor ersätts med Wigells diamantdesign.</p>
 
-        <div class="panel-discrete" style="max-width: 500px">
+        <div class="panel-discrete max-w-500px">
             <div class="form-group">
                 <label>Standard Textfält</label>
                 <input type="text" placeholder="Skriv in data här..."/>
             </div>
 
-            <div class="form-group" style="margin-top: 1.5rem">
+            <div class="form-group mt-2">
                 <label>Enskilt Val (Radioknapp)</label>
                 <label class="custom-check-label">
                     <input type="radio" name="opts" checked/>
@@ -811,7 +937,7 @@
                 </label>
             </div>
 
-            <div class="form-group" style="margin-top: 1.5rem">
+            <div class="form-group mt-2">
                 <label>Flerval (Kryssruta)</label>
                 <label class="custom-check-label">
                     <input type="checkbox" checked/>
@@ -904,7 +1030,7 @@
         </div>
 
         <!-- Tabeller -->
-        <h3 style="margin-top: 3rem">Tabeller</h3>
+        <h3 class="mt-3">Tabeller</h3>
 
         <h4>Lång Listtabell</h4>
         <p>Optimerad för vertikal läsbarhet med alternerande zebra-ränder och hover-markering.</p>
@@ -1067,7 +1193,7 @@
         <p>Den roterande, fyllda diamanten indikerar pågående bakgrundsprocesser.
             Knuten till logotypens formspråk för visuell konsistens.</p>
 
-        <div class="panel-discrete" style="height: 120px; display: flex; align-items: center; justify-content: center">
+        <div class="panel-discrete d-flex align-center justify-center h-120px">
             <div class="loader"></div>
         </div>
         <button class="toggle-code-btn">Visa kod &lt;/&gt;</button>
@@ -1099,11 +1225,11 @@
         </div>
 
         <!-- Toasts -->
-        <h3 style="margin-top: 3rem">Notifikationer (Toasts)</h3>
+        <h3 class="mt-3">Notifikationer (Toasts)</h3>
         <p>Tillfälliga meddelanden för att bekräfta att en händelse lyckats eller
             misslyckats. Visas normalt i ett hörn av skärmen.</p>
 
-        <div class="panel-discrete" style="display: flex; flex-direction: column; gap: 1rem">
+        <div class="panel-discrete d-flex flex-column gap-1">
             <div class="toast toast-success">
                 <span class="diamond-icon"></span>
                 Sparningen lyckades. Databasen är uppdaterad.
@@ -1170,40 +1296,40 @@
 
         <!-- Kod- och namngivningsstandard -->
         <h3>Kod- och Namngivningsstandard</h3>
-        <p style="margin-bottom: 1.5rem;">För att hålla Wigells kodbas ren, skalbar och lättarbetad för alla utvecklare
+        <p class="mb-1-5">För att hålla Wigells kodbas ren, skalbar och lättarbetad för alla utvecklare
             i teamet, följer vi dessa grundläggande principer:</p>
-        <div class="panel-discrete" style="margin-bottom: 3rem;">
-            <div style="display: flex; flex-wrap: wrap; gap: 2rem;">
+        <div class="panel-discrete mb-3">
+            <div class="d-flex flex-wrap gap-2">
                 <!-- Namngivning -->
-                <div style="flex: 1; min-width: 250px;">
-                    <h5 style="color: var(--accent); font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; letter-spacing: 1px;">
+                <div class="flex-1 min-w-250px">
+                    <h5 class="text-accent font-size-1-1rem mb-0-5 text-uppercase letter-spacing-1px">
                         Namngivning (CSS)</h5>
-                    <ul style="color: var(--text-muted); padding-left: 1.5rem; font-size: 0.95rem; line-height: 1.6;">
-                        <li style="margin-bottom: 0.5rem;"><strong>Komponentbaserat:</strong> Vi utgår från ett
+                    <ul class="text-muted pl-1-5 font-size-0-95rem line-height-1-6">
+                        <li class="mb-0-5"><strong>Komponentbaserat:</strong> Vi utgår från ett
                             grundblock (t.ex. <code>.btn</code>, <code>.panel</code>).
                         </li>
-                        <li style="margin-bottom: 0.5rem;"><strong>Modifierare:</strong> Varianter av en komponent
+                        <li class="mb-0-5"><strong>Modifierare:</strong> Varianter av en komponent
                             prefixas med grundnamnet (t.ex. <code>.btn-primary</code>, <code>.panel-negative</code>).
                         </li>
-                        <li style="margin-bottom: 0.5rem;"><strong>Små bokstäver och bindestreck:</strong> Klasser
+                        <li class="mb-0-5"><strong>Små bokstäver och bindestreck:</strong> Klasser
                             skrivs alltid med gemener (kebab-case), t.ex. <code>.nav-links</code>.
                         </li>
                     </ul>
                 </div>
 
                 <!-- Kodstandard -->
-                <div style="flex: 1; min-width: 250px;">
-                    <h5 style="color: var(--accent); font-size: 1.1rem; margin-bottom: 0.5rem; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; letter-spacing: 1px;">
+                <div class="flex-1 min-w-250px">
+                    <h5 class="text-accent font-size-1-1rem mb-0-5 text-uppercase letter-spacing-1px">
                         Kodstandard</h5>
-                    <ul style="color: var(--text-muted); padding-left: 1.5rem; font-size: 0.95rem; line-height: 1.6;">
-                        <li style="margin-bottom: 0.5rem;"><strong>Använd variabler:</strong> Hårdkoda aldrig färger
+                    <ul class="text-muted pl-1-5 font-size-0-95rem line-height-1-6">
+                        <li class="mb-0-5"><strong>Använd variabler:</strong> Hårdkoda aldrig färger
                             eller animationstider. Använd alltid våra CSS Custom Properties (ex.
                             <code>var(--accent)</code>).
                         </li>
-                        <li style="margin-bottom: 0.5rem;"><strong>Semantisk HTML:</strong> Använd rätt HTML5-taggar
+                        <li class="mb-0-5"><strong>Semantisk HTML:</strong> Använd rätt HTML5-taggar
                             (<code>&lt;nav&gt;</code>, <code>&lt;section&gt;</code>) istället för oändliga <code>&lt;div&gt;</code>-element.
                         </li>
-                        <li style="margin-bottom: 0.5rem;"><strong>Responsivt först:</strong> Använd relativa enheter
+                        <li class="mb-0-5"><strong>Responsivt först:</strong> Använd relativa enheter
                             (<code>rem</code>, <code>%</code>) och media-queries för att säkerställa att komponenten
                             fungerar på alla skärmar.
                         </li>
@@ -1326,19 +1452,18 @@
             i logotyp, knappar, navigering, paneler och formulärkontroller.
             Implementeras alltid med <code>transform: rotate(45deg)</code>.</p>
 
-        <div class="panel-discrete"
-             style="display: flex; gap: 3rem; align-items: center; justify-content: center; padding: 3rem; flex-wrap: wrap">
-            <div style="text-align: center">
-                <div style="width: 20px; height: 20px; background: var(--accent); transform: rotate(45deg); margin: 1rem auto"></div>
-                <p style="font-size: 0.85rem; margin: 0">Fylld — aktiv/vald</p>
+        <div class="panel-discrete d-flex gap-2 align-center justify-center p-3 flex-wrap">
+            <div class="text-center">
+                <div class="w-20px h-20px rotate-45 m-1-auto" style="background: var(--accent)"></div>
+                <p class="font-size-0-85rem m-0">Fylld — aktiv/vald</p>
             </div>
-            <div style="text-align: center">
-                <div style="width: 20px; height: 20px; border: 2px solid var(--accent); transform: rotate(45deg); margin: 1rem auto"></div>
-                <p style="font-size: 0.85rem; margin: 0">Kontur — tillgänglig</p>
+            <div class="text-center">
+                <div class="w-20px h-20px rotate-45 m-1-auto border-2-accent"></div>
+                <p class="font-size-0-85rem m-0">Kontur — tillgänglig</p>
             </div>
-            <div style="text-align: center">
-                <div style="width: 20px; height: 20px; border: 2px solid var(--text-muted); transform: rotate(45deg); margin: 1rem auto"></div>
-                <p style="font-size: 0.85rem; margin: 0">Dämpad — inaktiv</p>
+            <div class="text-center">
+                <div class="w-20px h-20px rotate-45 m-1-auto border-2-muted"></div>
+                <p class="font-size-0-85rem m-0">Dämpad — inaktiv</p>
             </div>
         </div>
 
@@ -1395,37 +1520,38 @@
 
 
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
-    <!-- Modal: BOKA BIL -->
+    <!-- Dialog: BOKA BIL -->
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
-    <dialog id="booking-modal" class="panel panel-neutral" style="margin: auto; max-width: 400px;" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+    <dialog id="booking-modal" class="panel panel-neutral" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+        <div class="dialog-body">
         <h3 id="booking-modal-title">Boka Bil</h3>
-        <p id="booking-car-name" style="color: var(--text); font-weight: bold; margin-bottom: 1rem;"></p>
+        <p id="booking-car-name" class="modal-subtitle"></p>
         <form id="booking-form">
             <input type="hidden" id="booking-car-id">
             <div class="form-group">
                 <label for="start-date">Startdatum</label>
-                <input type="date" id="start-date" required
-                       style="background: #1a1a1a; color: white; border: none; border-bottom: 2px solid var(--border); padding: 10px; width: 100%;">
+                <input type="date" id="start-date" required>
             </div>
             <div class="form-group">
                 <label for="end-date">Slutdatum</label>
-                <input type="date" id="end-date" required
-                       style="background: #1a1a1a; color: white; border: none; border-bottom: 2px solid var(--border); padding: 10px; width: 100%;">
+                <input type="date" id="end-date" required>
             </div>
-            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <div class="dialog-actions">
                 <button type="submit" class="btn btn-positive">Bekräfta</button>
                 <button type="button" class="btn btn-secondary" id="close-modal-btn">Avbryt</button>
             </div>
         </form>
+        </div>
     </dialog>
 
 
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
-    <!-- Modal: LÄGG TILL / REDIGERA BIL -->
+    <!-- Dialog: LÄGG TILL / REDIGERA BIL -->
     <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
-    <dialog id="add-car-modal" class="panel panel-neutral" style="margin: auto; max-width: 500px; width: 100%;" role="dialog" aria-modal="true" aria-labelledby="add-car-title">
+    <dialog id="add-car-modal" class="panel panel-neutral" role="dialog" aria-modal="true" aria-labelledby="add-car-title">
+        <div class="dialog-body">
         <h3 id="add-car-title">Lägg till ny bil</h3>
-        <form id="add-car-form" style="margin-top: 1rem;">
+        <form id="add-car-form">
             <input type="hidden" id="edit-car-id"> <!-- Döljt ID-fält för Redigering -->
 
             <div class="form-group">
@@ -1442,7 +1568,7 @@
             </div>
             <div class="form-group">
                 <label for="price">Pris (kr/dag)</label>
-                <input type="number" id="price" required style="background: #1a1a1a; color: white; border: none; border-bottom: 2px solid var(--border); padding: 12px 16px; font-family: inherit; font-size: 1rem; outline: none; width: 100%;">
+                <input type="number" id="price" required>
             </div>
             <div class="form-group">
                 <label for="feature1">Egenskap 1 (t.ex. Automat)</label>
@@ -1458,32 +1584,36 @@
             </div>
             <div class="form-group">
                 <label for="car-image">Bilbild (.png/.jpg) - Vid redigering kan du lämna tom</label>
-                <input type="file" id="car-image" accept="image/png, image/jpeg" style="margin-top: 0.5rem; color: var(--text-muted);">
+                <input type="file" id="car-image" accept="image/png, image/jpeg">
             </div>
-            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <div class="dialog-actions">
                 <button type="submit" class="btn btn-positive" id="add-car-submit-btn">Spara bil</button>
                 <button type="button" class="btn btn-secondary" id="close-add-car-btn">Avbryt</button>
             </div>
         </form>
-    </dialog>
-
-
-
-    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
-    <!-- Modal: BEKRÄFTA BORTTAGNING -->
-    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
-    <dialog id="confirm-action-modal" class="panel panel-negative" style="margin: auto; max-width: 420px; width: 100%;" role="dialog" aria-modal="true" aria-labelledby="confirm-action-title">
-        <h3 id="confirm-action-title" style="color: var(--color-negative);">Bekräfta åtgärd</h3>
-        <p id="confirm-action-message">Denna åtgärd kan inte ångras.</p>
-        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-            <button type="button" class="btn btn-negative" id="confirm-action-btn">Ja, fortsätt</button>
-            <button type="button" class="btn btn-secondary" id="cancel-action-btn">Avbryt</button>
         </div>
     </dialog>
 
-    <dialog id="edit-user-modal" class="panel panel-neutral" style="margin: auto; max-width: 500px; width: 100%;" role="dialog" aria-modal="true" aria-labelledby="edit-user-title">
+
+
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <!-- Dialog: BEKRÄFTA BORTTAGNING -->
+    <!-- ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
+    <dialog id="confirm-action-modal" class="panel panel-negative" role="dialog" aria-modal="true" aria-labelledby="confirm-action-title">
+        <div class="dialog-body">
+        <h3 id="confirm-action-title" class="modal-subtitle modal-subtitle--negative">Bekräfta åtgärd</h3>
+        <p id="confirm-action-message">Denna åtgärd kan inte ångras.</p>
+        <div class="dialog-actions">
+            <button type="button" class="btn btn-negative" id="confirm-action-btn">Ja, fortsätt</button>
+            <button type="button" class="btn btn-secondary" id="cancel-action-btn">Avbryt</button>
+        </div>
+        </div>
+    </dialog>
+
+    <dialog id="edit-user-modal" class="panel panel-neutral" role="dialog" aria-modal="true" aria-labelledby="edit-user-title">
+        <div class="dialog-body">
         <h3 id="edit-user-title">Redigera användare</h3>
-        <form id="edit-user-form" style="margin-top: 1rem;">
+        <form id="edit-user-form">
             <input type="hidden" id="edit-user-id">
             <div class="form-group">
                 <label for="edit-user-username">Användarnamn</label>
@@ -1507,35 +1637,38 @@
             </div>
             <div class="form-group">
                 <label for="edit-user-role">Roll</label>
-                <select id="edit-user-role" style="background: var(--bg-elevated); color: var(--text); border: none; border-bottom: 2px solid var(--border); padding: 12px 16px; font-family: inherit; font-size: 1rem; width: 100%; outline: none;">
+                <select id="edit-user-role">
                     <option value="ROLE_USER">USER</option>
                     <option value="ROLE_ADMIN">ADMIN</option>
                 </select>
             </div>
-            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <div class="dialog-actions">
                 <button type="submit" class="btn btn-positive">Spara ändringar</button>
                 <button type="button" class="btn btn-secondary" id="close-edit-user-btn">Avbryt</button>
             </div>
         </form>
+        </div>
     </dialog>
 
-    <dialog id="edit-booking-modal" class="panel panel-neutral" style="margin: auto; max-width: 400px; width: 100%;" role="dialog" aria-modal="true" aria-labelledby="edit-booking-title">
+    <dialog id="edit-booking-modal" class="panel panel-neutral" role="dialog" aria-modal="true" aria-labelledby="edit-booking-title">
+        <div class="dialog-body">
         <h3 id="edit-booking-title">Redigera bokning</h3>
-        <form id="edit-booking-form" style="margin-top: 1rem;">
+        <form id="edit-booking-form">
             <input type="hidden" id="edit-booking-id">
             <div class="form-group">
                 <label for="edit-booking-start">Startdatum</label>
-                <input type="date" id="edit-booking-start" required style="background: var(--bg-elevated); color: var(--text); border: none; border-bottom: 2px solid var(--border); padding: 10px; width: 100%;">
+                <input type="date" id="edit-booking-start" required>
             </div>
             <div class="form-group">
                 <label for="edit-booking-end">Slutdatum</label>
-                <input type="date" id="edit-booking-end" required style="background: var(--bg-elevated); color: var(--text); border: none; border-bottom: 2px solid var(--border); padding: 10px; width: 100%;">
+                <input type="date" id="edit-booking-end" required>
             </div>
-            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <div class="dialog-actions">
                 <button type="submit" class="btn btn-positive">Spara ändringar</button>
                 <button type="button" class="btn btn-secondary" id="close-edit-booking-btn">Avbryt</button>
             </div>
         </form>
+        </div>
     </dialog>
 
 </main>
@@ -1546,7 +1679,7 @@
 
 <footer>
     <p>
-        &copy; 2026 Wigell Rental. En del av Wigellkoncernen. Alla rättigheter förbehållna. <br><br>
+        &copy; 2026 Wigell Rental. En del av Wigellkoncernen. Alla rättigheter förbehållna. <br>
         &copy; 2026 Wigell SecNet | &copy; 2026 Wigell Padel | &copy; 2025 Wigell Camping | &copy; 2025 Wigell
         Kalkylatorn
     </p>
