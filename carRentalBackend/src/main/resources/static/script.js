@@ -53,20 +53,24 @@ function loadSession() {
 async function apiFetch(url, opts = {}) {
     const headers = {...opts.headers};
 
+    // Om användaren är inloggad, lägg till Authorization-headern med de sparade credentials (Base64-kodade användarnamn och lösenord)
     if (state.credentials) {
         headers['Authorization'] = `Basic ${state.credentials}`;
     }
 
+    // Om det finns en body och den inte är en FormData, anta att det är JSON och sätt Content-Type
     if (opts.body && !(opts.body instanceof FormData)) {
         headers['Content-Type'] = 'application/json';
     }
 
+    // Skicka förfrågan till API:et med inkluderade credentials (cookies) och hantera eventuella fel
     const res = await fetch(url, {
         ...opts,
         headers,
         credentials: 'include',
     });
 
+    // Om svaret inte är OK (statuskod utanför 200-299), skapa ett felobjekt med status och eventuellt meddelande från servern
     if (!res.ok) {
         const err = new Error(`HTTP ${res.status}`);
         err.status = res.status;
@@ -426,6 +430,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // ─── ADMIN - Ta bort användare ─────────────────────────────────────────────────────────────────────────────────────
         const deleteUserBtn = e.target.closest('.delete-user-btn');
         if (deleteUserBtn) {
             const userId = deleteUserBtn.getAttribute('data-id');
