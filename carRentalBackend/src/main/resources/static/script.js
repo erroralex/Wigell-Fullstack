@@ -1,5 +1,5 @@
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-// State Management
+// TILLSTÅNDSHANTERING - Håller all applikationsdata och sorteringsstatus på ett ställe
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 const state = {
     currentUser: null,
@@ -23,7 +23,7 @@ const state = {
 const API_BASE = 'http://localhost:8080/api/v1';
 
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-// SESSION PERSISTENCE
+// SESSIONSHANTERING - Sparar inloggningsstatus i localStorage
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 function saveSession() {
     if (state.currentUser && state.credentials) {
@@ -48,7 +48,7 @@ function loadSession() {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-// API WRAPPER
+// API-HANTERARE - Hanterar autentisering och felhantering på ett ställe
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 async function apiFetch(url, opts = {}) {
     const headers = {...opts.headers};
@@ -81,17 +81,19 @@ async function apiFetch(url, opts = {}) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-// MAIN APPLICATION LOGIC
+// HUVUDLOGIK - Hanterar routing, global klick-hantering, modaler och andra UI-interaktioner
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-window.addEventListener('load', () => {
-
+window.addEventListener('DOMContentLoaded', () => {
+    // Försök ladda tidigare session (om den finns)
     loadSession();
 
+    // Reset för kodexemplen i styleguiden
     const resetAllCodeToggles = () => {
         document.querySelectorAll('.code-wrapper.is-open').forEach(wrapper => wrapper.classList.remove('is-open'));
         document.querySelectorAll('.toggle-code-btn').forEach(btn => btn.innerHTML = 'Visa kod &lt;/&gt;');
     };
 
+    // Hamburger-meny: Toggle och stängning vid navigering
     const hamburger = document.getElementById('hamburger');
     const navMenu = document.querySelector('.nav-links');
 
@@ -111,55 +113,50 @@ window.addEventListener('load', () => {
         });
     }
 
+    // Navigering: Hantera visning av sektioner och åtkomstkontroll
     const topNavLinks = document.querySelectorAll('header .nav-link');
     const sections = document.querySelectorAll('main > .page-section');
 
     const updateNavVisibility = () => {
         const navLogin = document.getElementById('nav-login');
-        const navLogout = document.getElementById('nav-logout');
-        const navCars = document.getElementById('nav-cars');
-        const navMinaSidor = document.getElementById('nav-mina-sidor');
-
-        // ─── ADMIN-LÄNKAR ────────────────────────────────────────────────────────────────────────────────────────────────────
+        const navProfile = document.getElementById('nav-profile');
         const navAdmin = document.getElementById('nav-admin');
         const navStyleguide = document.getElementById('nav-styleguide');
-
+        const profileName = document.getElementById('nav-profile-name');
 
         if (state.currentUser) {
-            if (navLogin) navLogin.style.display = 'none';
-            if (navLogout) navLogout.style.display = 'flex';
+            if (navLogin)   navLogin.classList.add('d-none');
+            if (navProfile) navProfile.classList.remove('d-none');
+
+            if (profileName) {
+                profileName.textContent = state.currentUser.firstName
+                    || state.currentUser.username
+                    || 'Profil';
+            }
 
             if (state.currentUser.isAdmin) {
-                if (navAdmin) navAdmin.style.display = 'flex';
-                if (navStyleguide) navStyleguide.style.display = 'flex';
-
-                if (navMinaSidor) navMinaSidor.style.display = 'none';
-                if (navCars) navCars.style.display = 'none';
+                if (navAdmin)      navAdmin.classList.remove('d-none');
+                if (navStyleguide) navStyleguide.classList.remove('d-none');
             } else {
-                if (navCars) navCars.style.display = 'flex';
-                if (navMinaSidor) navMinaSidor.style.display = 'flex';
-
-                if (navAdmin) navAdmin.style.display = 'none';
-                if (navStyleguide) navStyleguide.style.display = 'none';
+                if (navAdmin)      navAdmin.classList.add('d-none');
+                if (navStyleguide) navStyleguide.classList.add('d-none');
             }
         } else {
-            if (navLogin) navLogin.style.display = 'flex';
-            if (navLogout) navLogout.style.display = 'none';
-
-            if (navMinaSidor) navMinaSidor.style.display = 'none';
-            if (navAdmin) navAdmin.style.display = 'none';
-            if (navStyleguide) navStyleguide.style.display = 'none';
-
-            if (navCars) navCars.style.display = 'flex';
+            if (navLogin)      navLogin.classList.remove('d-none');
+            if (navProfile)    navProfile.classList.add('d-none');
+            if (navAdmin)      navAdmin.classList.add('d-none');
+            if (navStyleguide) navStyleguide.classList.add('d-none');
         }
     };
 
+    // Navigering: Visa rätt sektion och hantera åtkomstkontroll för admin-sektioner
     const navigateTo = (targetId) => {
         const isSubSection = ['branding', 'components', 'forms-tables', 'feedback', 'css'].includes(targetId);
         let actualSectionId = targetId;
 
         const adminViews = ['admin-cars', 'admin-styleguide', 'admin-users', 'admin-bookings', 'branding', 'components', 'forms-tables', 'feedback', 'css'];
 
+        // Om en icke-admin försöker navigera till en admin-sektion, visa ett felmeddelande och omdirigera till login
         if (adminViews.includes(actualSectionId) && !state.currentUser?.isAdmin) {
             showToast('Åtkomst nekad. Logga in som admin.', 'error');
             actualSectionId = 'login';
@@ -167,6 +164,7 @@ window.addEventListener('load', () => {
 
         resetAllCodeToggles();
 
+        // Uppdatera aktiv länk i navigeringen
         topNavLinks.forEach(link => {
             link.classList.remove('active');
             let href = link.getAttribute('href');
@@ -175,19 +173,23 @@ window.addEventListener('load', () => {
             }
         });
 
+        // Visa endast den valda sektionen
         sections.forEach(sec => {
             sec.classList.remove('active');
             if (sec.id === actualSectionId) sec.classList.add('active');
         });
 
+        // Scrolla alltid till toppen av sidan vid navigering
         window.scrollTo({top: 0, behavior: 'smooth'});
 
+        // Ladda data för sektionen vid navigering
         if (actualSectionId === 'cars') fetchCars();
         if (actualSectionId === 'admin-cars') fetchAdminCars();
         if (actualSectionId === 'admin-users') fetchAdminUsers();
         if (actualSectionId === 'admin-bookings') fetchAdminBookings();
         if (actualSectionId === 'mina-sidor') fetchUserBookings();
 
+        // Om användaren navigerar till login-sektionen, fokusera på användarnamn-inputen
         if (actualSectionId === 'login') {
             setTimeout(() => {
                 const usernameInput = document.getElementById('username');
@@ -197,7 +199,7 @@ window.addEventListener('load', () => {
     };
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // GLOBALA KLICK-LYSSNARE
+    // GLOBALA KLICK-LYSSNARE - Hantera all klick-interaktion på ett ställe
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     document.body.addEventListener('click', (e) => {
 
@@ -206,6 +208,7 @@ window.addEventListener('load', () => {
         if (link) {
             const href = link.getAttribute('href');
 
+            // Logga ut
             if (href === '#logout') {
                 e.preventDefault();
                 state.currentUser = null;
@@ -218,6 +221,7 @@ window.addEventListener('load', () => {
                 return;
             }
 
+            // Förhindra sidhopp om länken är en ren trigger (href="#") och hantera navigering för andra hash-länkar
             if (href.length > 1) {
                 e.preventDefault();
                 const targetId = href.substring(1);
@@ -297,7 +301,34 @@ window.addEventListener('load', () => {
             renderAdminBookings();
         }
 
-        // ─── BOKNING - ÖPPNA MODAL ───────────────────────────────────────────────────────────────────────────────────────────
+        // ─── SORTERING AV KUNDGALLERIET — SORTKNAPP ──────────────────────────────────────────────────────────────────────────
+        const sortCarBtn = e.target.closest('.sort-cars-btn');
+        if (sortCarBtn) {
+            const col = sortCarBtn.getAttribute('data-sort');
+            if (state.carSortBy === col) {
+                state.carSortDesc = !state.carSortDesc;
+            } else {
+                state.carSortBy = col;
+                state.carSortDesc = false;
+            }
+            document.querySelectorAll('.sort-cars-btn').forEach(btn => {
+                const isActive = btn.getAttribute('data-sort') === state.carSortBy;
+                btn.classList.toggle('active-sort', isActive);
+                btn.setAttribute('aria-pressed', String(isActive));
+            });
+            updateSortDirBtn();
+            renderGallery();
+        }
+
+        // ─── SORTERING AV KUNDGALLERIET — RIKTNINGSKNAPP ─────────────────────────────────────────────────────────────────────
+        const sortDirBtn = e.target.closest('#sort-dir-btn');
+        if (sortDirBtn) {
+            state.carSortDesc = !state.carSortDesc;
+            updateSortDirBtn();
+            renderGallery();
+        }
+
+        // ─── BOKNING - ÖPPNA DIALOG ──────────────────────────────────────────────────────────────────────────────────────────
         const card = e.target.closest('.float-card');
         const bookBtn = e.target.closest('.book-car-btn') || (card ? card.querySelector('.book-car-btn') : null);
         if (bookBtn && !bookBtn.disabled) {
@@ -358,7 +389,7 @@ window.addEventListener('load', () => {
             }
         }
 
-        // ADMIN - Ta bort bil
+        // ─── ADMIN - Ta bort bil ────────────────────────────────────────────────────────────────────────────────────────────
         const deleteCarBtn = e.target.closest('.delete-car-btn');
         if (deleteCarBtn) {
             const carId = deleteCarBtn.getAttribute('data-id');
@@ -377,7 +408,7 @@ window.addEventListener('load', () => {
             });
         }
 
-        // ADMIN - Redigera användare
+        // ─── ADMIN - Redigera användare ─────────────────────────────────────────────────────────────────────────────────────
         const editUserBtn = e.target.closest('.edit-user-btn');
         if (editUserBtn) {
             const userId = editUserBtn.getAttribute('data-id');
@@ -412,7 +443,7 @@ window.addEventListener('load', () => {
             });
         }
 
-        // ADMIN - Redigera bokning
+        // ─── ADMIN - Redigera bokning ───────────────────────────────────────────────────────────────────────────────────────
         const editBookingBtn = e.target.closest('.edit-booking-btn');
         if (editBookingBtn) {
             const bookingId = editBookingBtn.getAttribute('data-id');
@@ -427,6 +458,7 @@ window.addEventListener('load', () => {
             }
         }
 
+        // ─── ADMIN - Ta bort bokning ────────────────────────────────────────────────────────────────────────────────────────
         const deleteBookingBtn = e.target.closest('.delete-booking-btn');
         if (deleteBookingBtn) {
             const bookingId = deleteBookingBtn.getAttribute('data-id');
@@ -443,15 +475,87 @@ window.addEventListener('load', () => {
                 }
             });
         }
+
+        // ─── ADMIN — Återlämna bokning ───────────────────────────────────────────────────────────────────────────────────────
+        const returnBookingBtn = e.target.closest('.return-booking-btn');
+        if (returnBookingBtn) {
+            const bookingId = returnBookingBtn.getAttribute('data-id');
+            showConfirmModal({
+                title: 'Återlämna bil',
+                message: 'Bekräfta att du vill återlämna denna bokning.',
+                confirmLabel: 'Ja, återlämna',
+                onConfirm: async () => {
+                    await apiFetch(`${API_BASE}/bookings/return/${bookingId}`, { method: 'PUT' });
+                    showToast('Bokningen markerades som återlämnad.', 'success');
+                    fetchAdminBookings();
+                    fetchUserBookings();
+                    fetchCars();
+                }
+            });
+        }
+
+        // ─── MINA SIDOR — Återlämna bil ──────────────────────────────────────────────────────────────────────────────────────
+        const returnCarBtn = e.target.closest('.return-car-btn');
+        if (returnCarBtn) {
+            const bookingId = returnCarBtn.getAttribute('data-id');
+            showConfirmModal({
+                title: 'Återlämna bil',
+                message: 'Bekräfta att du vill returnera bilen. Bokningen markeras som avslutad.',
+                confirmLabel: 'Ja, återlämna',
+                onConfirm: async () => {
+                    await apiFetch(`${API_BASE}/bookings/return/${bookingId}`, { method: 'PUT' });
+                    showToast('Bilen har återlämnats!', 'success');
+                    fetchUserBookings();
+                    fetchCars();
+                }
+            });
+        }
+
+        // ─── ÖPPNA DEMO-DIALOGER (STYLEGUIDE) ────────────────────────────────────────────────────────────────────────────────
+        const demoModalTrigger = e.target.closest('.demo-modal-trigger');
+        if (demoModalTrigger) {
+            const targetId = demoModalTrigger.getAttribute('data-target');
+            const modal = document.getElementById(targetId);
+            if (modal) modal.showModal();
+        }
+
+        // ─── DROPDOWN-MENYER (KLICK-HANTERING) ───────────────────────────────────────────────────────────────────────────────
+        const dropdownTrigger = e.target.closest('.example-nav-item > .nav-link');
+        
+        if (dropdownTrigger && dropdownTrigger.nextElementSibling?.classList.contains('sub-nav')) {
+            // Förhindra sidhopp om länken är en ren trigger (href="#")
+            if (dropdownTrigger.getAttribute('href') === '#') {
+                e.preventDefault();
+            }
+            
+            // Kolla nuvarande status för den klickade dropdownen
+            const isExpanded = dropdownTrigger.getAttribute('aria-expanded') === 'true';
+            
+            // Stäng alla andra dropdowns först
+            document.querySelectorAll('.example-nav-item > .nav-link').forEach(trigger => {
+                trigger.setAttribute('aria-expanded', 'false');
+            });
+            
+            // Toggla den klickade
+            dropdownTrigger.setAttribute('aria-expanded', String(!isExpanded));
+        }
+
+        // Stäng alla dropdowns om klick sker var som helst utanför navigeringsfälten
+        if (!e.target.closest('.example-nav-item')) {
+            document.querySelectorAll('.example-nav-item > .nav-link').forEach(trigger => {
+                trigger.setAttribute('aria-expanded', 'false');
+            });
+        }
     });
 
+    // Vid sidladdning, navigera till den hash-sektion som anges i URL:en (om någon), annars visa "cars"
     const currentHash = window.location.hash.substring(1);
     if (currentHash) navigateTo(currentHash);
     else navigateTo('cars');
 
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // DELETE MODAL - Hantera Bekräfta och Avbryt
+    // TA BORT-DIALOG - Hantera Bekräfta och Avbryt
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     const confirmActionModal = document.getElementById('confirm-action-modal');
     const confirmActionTitle = document.getElementById('confirm-action-title');
@@ -460,6 +564,7 @@ window.addEventListener('load', () => {
     const cancelActionBtn = document.getElementById('cancel-action-btn');
     let confirmActionCallback = null;
 
+    // Funktion för att visa bekräftelsemodalen med anpassat innehåll och callback
     function showConfirmModal({title, message, confirmLabel = 'Ja, fortsätt', onConfirm}) {
         if (!confirmActionModal || !confirmActionTitle || !confirmActionMessage || !confirmActionBtn) return;
         confirmActionTitle.textContent = title;
@@ -470,6 +575,7 @@ window.addEventListener('load', () => {
         confirmActionModal.showModal();
     }
 
+    // Hantera klick på "Bekräfta"-knappen i bekräftelsemodalen
     if (confirmActionBtn) {
         confirmActionBtn.addEventListener('click', async () => {
             if (!confirmActionCallback) return;
@@ -481,6 +587,7 @@ window.addEventListener('load', () => {
                 await confirmActionCallback();
             } catch (err) {
                 console.error(err);
+                showToast(err.serverMessage || 'Åtgärden misslyckades. Försök igen.', 'error');
             } finally {
                 if (confirmActionModal) confirmActionModal.close();
                 confirmActionCallback = null;
@@ -490,6 +597,7 @@ window.addEventListener('load', () => {
         });
     }
 
+    // Hantera klick på "Avbryt"-knappen i bekräftelsemodalen
     if (cancelActionBtn) {
         cancelActionBtn.addEventListener('click', () => {
             if (confirmActionModal) confirmActionModal.close();
@@ -498,12 +606,22 @@ window.addEventListener('load', () => {
     }
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // BOKNINGS-MODAL: AVBRYT & SUBMIT
+    // BOKNINGS-DIALOG - Hanterar avbryt och skicka (submit)
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     const bookingModal = document.getElementById('booking-modal');
     const bookingForm = document.getElementById('booking-form');
     const closeModalBtn = document.getElementById('close-modal-btn');
 
+    // När startdatum ändras, uppdatera minimalt tillåtna slutdatum
+    const startDateInput = document.getElementById('start-date');
+    if (startDateInput) {
+        startDateInput.addEventListener('change', function () {
+            const endDateInput = document.getElementById('end-date');
+            if (endDateInput) endDateInput.min = this.value;
+        });
+    }
+
+    // Hantera stängning av bokningsmodalen
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', () => {
             bookingModal.close();
@@ -511,6 +629,7 @@ window.addEventListener('load', () => {
         });
     }
 
+    // Hantera bokningsformulärets submission
     if (bookingForm) {
         bookingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -519,9 +638,23 @@ window.addEventListener('load', () => {
             const endDate = document.getElementById('end-date').value;
             const submitBtn = bookingForm.querySelector('button[type="submit"]');
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Bokar...';
+            // Validera att slutdatum är efter startdatumet
+            if (endDate < startDate) {
+                showToast('Slutdatumet måste vara efter startdatumet.', 'error');
+                return;
+            }
+            if (endDate === startDate) {
+                showToast('Minsta hyrtid är en dag — välj ett slutdatum efter startdatumet.', 'error');
+                return;
+            }
 
+            // Inaktivera submit-knappen och visa en laddningsindikator
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Bokar...';
+            }
+
+            // Skicka bokningsförfrågan till API:et
             try {
                 await apiFetch(`${API_BASE}/bookings`, {
                     method: 'POST',
@@ -533,14 +666,18 @@ window.addEventListener('load', () => {
                     })
                 });
 
+                // Vid lyckad bokning, visa en bekräftelse och uppdatera bil- och bokningslistorna
                 showToast('Bokning genomförd!', 'success');
                 bookingModal.close();
                 bookingForm.reset();
                 fetchCars();
-
+            
+            // Vid fel, logga det och visa ett användarvänligt meddelande
             } catch (err) {
                 console.error(err);
                 showToast(err.serverMessage || 'Ett fel uppstod vid bokningen.', 'error');
+
+            // Oavsett resultat, återställ submit-knappen till sitt ursprungliga skick
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Bekräfta';
@@ -549,12 +686,13 @@ window.addEventListener('load', () => {
     }
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // ADMIN: LÄGG TILL / REDIGERA BIL-MODAL
+    // ADMIN: LÄGG TILL / REDIGERA BIL-DIALOG
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     const addCarModal = document.getElementById('add-car-modal');
     const addCarForm = document.getElementById('add-car-form');
     const closeAddCarBtn = document.getElementById('close-add-car-btn');
 
+    // Hantera stängning av "Lägg till bil"-modalen
     if (closeAddCarBtn) {
         closeAddCarBtn.addEventListener('click', () => {
             if (addCarModal) addCarModal.close();
@@ -562,6 +700,7 @@ window.addEventListener('load', () => {
         });
     }
 
+    // Hantera "Lägg till / Redigera bil"-formuläret
     if (addCarForm) {
         addCarForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -581,12 +720,11 @@ window.addEventListener('load', () => {
             const feature2Val = document.getElementById('feature2')?.value || '';
             const feature3Val = document.getElementById('feature3')?.value || '';
             const fileInput = document.getElementById('car-image');
-
             const editId = document.getElementById('edit-car-id').value;
             const method = editId ? 'PUT' : 'POST';
             const endpoint = editId ? `${API_BASE}/cars/${editId}` : `${API_BASE}/cars`;
 
-            // Bevara existerande booked status
+            // Bevara existerande bokad status
             let isBooked = false;
             let existingImage = null;
             if (editId) {
@@ -601,8 +739,8 @@ window.addEventListener('load', () => {
             };
 
             try {
-                if (method === 'POST') {
-                    // --- SKAPA BIL (POST) -> Förväntar sig MULTIPART_FORM_DATA ---
+                // LÄGG TILL BIL -> Förväntar sig multipart/form-data
+                if (method === 'POST') {                    
                     const formData = new FormData();
                     formData.append('name', nameVal);
                     formData.append('model', modelVal);
@@ -620,7 +758,7 @@ window.addEventListener('load', () => {
                     fetchOptions.body = formData;
 
                 } else {
-                    // --- REDIGERA BIL (PUT) -> Förväntar sig APPLICATION/JSON ---
+                    // REDIGERA BIL -> Förväntar sig APPLICATION/JSON
                     const carData = {
                         id: parseInt(editId),
                         name: nameVal,
@@ -649,6 +787,7 @@ window.addEventListener('load', () => {
                     fetchOptions.body = JSON.stringify(carData);
                 }
 
+                // Skicka API-förfrågan för att skapa eller uppdatera bilen
                 await apiFetch(endpoint, fetchOptions);
 
                 showToast(`Bilen har ${editId ? 'uppdaterats' : 'lagts till'}!`, 'success');
@@ -691,9 +830,11 @@ window.addEventListener('load', () => {
     });
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // AUTHENTICATION LOGIC
+    // AUTENTISERINGS-LOGIK - Hantera inloggning, utloggning och session
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     const loginForm = document.getElementById('login-form');
+    
+    // Hantera inloggningsformulärets submission
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -702,12 +843,14 @@ window.addEventListener('load', () => {
             const errEl = document.getElementById('login-error');
             const btn = loginForm.querySelector('button[type="submit"]');
 
+            // Dölj eventuella tidigare felmeddelanden
             errEl.style.display = 'none';
             if (btn) {
                 btn.disabled = true;
                 btn.textContent = 'Loggar in…';
             }
 
+            // Skicka inloggningsförfrågan till API:et
             try {
                 const res = await fetch(`${API_BASE}/auth/login`, {
                     method: 'POST',
@@ -716,12 +859,19 @@ window.addEventListener('load', () => {
                     body: JSON.stringify({username, password}),
                 });
 
+                // Om svaret inte är OK, kasta ett fel för att trigga catch-blocket
                 if (!res.ok) throw new Error('unauthorized');
 
                 const data = await res.json();
-                state.currentUser = {id: data.userId, username: data.username, isAdmin: data.isAdmin};
+                state.currentUser = {
+                    id:        data.userId,
+                    username:  data.username,
+                    firstName: data.firstName || null,
+                    isAdmin:   data.isAdmin
+                };
                 state.credentials = btoa(`${username}:${password}`);
 
+                // Spara sessionen, uppdatera navigeringen och dirigera användaren baserat på deras roll
                 saveSession();
                 loginForm.reset();
                 updateNavVisibility();
@@ -741,20 +891,21 @@ window.addEventListener('load', () => {
             } finally {
                 if (btn) {
                     btn.disabled = false;
-                    btn.textContent = 'Logga In';
+                    btn.textContent = 'Logga in';
                 }
             }
         });
     }
 
     // ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────-
-    // USER REGISTRATION (SKAPA ANVÄNDARE)
+    // SKAPA ANVÄNDARE - Hantera registreringsdialogen
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     const openRegisterBtn = document.getElementById('open-register-btn');
     const registerModal = document.getElementById('register-modal');
     const closeRegisterBtn = document.getElementById('close-register-btn');
     const registerForm = document.getElementById('register-form');
 
+    // Hantera öppning av registreringsdialogen
     if (openRegisterBtn && registerModal) {
         openRegisterBtn.addEventListener('click', () => {
             registerModal.showModal();
@@ -762,6 +913,7 @@ window.addEventListener('load', () => {
         });
     }
 
+    // Hantera stängning av registreringsdialogen
     if (closeRegisterBtn) {
         closeRegisterBtn.addEventListener('click', () => {
             if (registerModal) registerModal.close();
@@ -769,6 +921,7 @@ window.addEventListener('load', () => {
         });
     }
 
+    // Hantera submission av registreringsformuläret
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -780,16 +933,19 @@ window.addEventListener('load', () => {
             const email = document.getElementById('register-email').value.trim();
             const password = document.getElementById('register-password').value;
 
+            // Validera att alla fält är ifyllda
             if (!username || !firstName || !lastName || !phone || !email || !password) {
                 showToast('Fyll i alla fält.', 'error');
                 return;
             }
 
+            // Inaktivera submit-knappen och visa en laddningsindikator
             if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Skapar...';
             }
 
+            // Skicka registreringsförfrågan till API:et
             try {
                 await apiFetch(`${API_BASE}/users`, {
                     method: 'POST',
@@ -805,6 +961,7 @@ window.addEventListener('load', () => {
                     })
                 });
 
+                // Vid lyckad registrering, visa en bekräftelse och förbered inloggningsformuläret
                 showToast('Konto skapat', 'success');
                 if (registerModal) registerModal.close();
                 registerForm.reset();
@@ -826,6 +983,9 @@ window.addEventListener('load', () => {
         });
     }
 
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // ADMIN - REDIGERA ANVÄNDARE & BOKNING - Hantera redigeringsdialoger
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     const editUserModal = document.getElementById('edit-user-modal');
     const editUserForm = document.getElementById('edit-user-form');
     const closeEditUserBtn = document.getElementById('close-edit-user-btn');
@@ -835,6 +995,7 @@ window.addEventListener('load', () => {
     const editBookingStart = document.getElementById('edit-booking-start');
     const editBookingEnd = document.getElementById('edit-booking-end');
 
+    // Hantera stängning av redigeringsdialogen
     if (closeEditUserBtn) {
         closeEditUserBtn.addEventListener('click', () => {
             if (editUserModal) editUserModal.close();
@@ -842,6 +1003,7 @@ window.addEventListener('load', () => {
         });
     }
 
+    // Hantera redigeringsformulärets submission
     if (editUserForm) {
         editUserForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -854,16 +1016,19 @@ window.addEventListener('load', () => {
             const role = document.getElementById('edit-user-role').value;
             const submitBtn = editUserForm.querySelector('button[type="submit"]');
 
+            // Validera att alla fält är ifyllda
             if (!username || !firstName || !lastName || !phone || !email) {
                 showToast('Fyll i alla användarfält.', 'error');
                 return;
             }
 
+            // Inaktivera submit-knappen och visa en laddningsindikator
             if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Sparar...';
             }
 
+            // Skicka redigeringsförfrågan till API:et
             try {
                 await apiFetch(`${API_BASE}/users/${userId}`, {
                     method: 'PUT',
@@ -877,6 +1042,7 @@ window.addEventListener('load', () => {
                     })
                 });
 
+                // Vid lyckad uppdatering, visa en bekräftelse och uppdatera listan
                 showToast('Användaren uppdaterades', 'success');
                 if (editUserModal) editUserModal.close();
                 editUserForm.reset();
@@ -893,6 +1059,7 @@ window.addEventListener('load', () => {
         });
     }
 
+    // Hantera stängning av redigeringsdialogen
     if (closeEditBookingBtn) {
         closeEditBookingBtn.addEventListener('click', () => {
             if (editBookingModal) editBookingModal.close();
@@ -900,12 +1067,14 @@ window.addEventListener('load', () => {
         });
     }
 
+    // Hantera ändringar i start- och slutdatum
     if (editBookingStart && editBookingEnd) {
         editBookingStart.addEventListener('change', function () {
             editBookingEnd.min = this.value;
         });
     }
 
+    // Hantera redigeringsformulärets submission
     if (editBookingForm) {
         editBookingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -924,6 +1093,7 @@ window.addEventListener('load', () => {
                 submitBtn.textContent = 'Sparar...';
             }
 
+            // Skicka redigeringsförfrågan till API:et
             try {
                 await apiFetch(`${API_BASE}/bookings/${bookingId}`, {
                     method: 'PUT',
@@ -933,6 +1103,7 @@ window.addEventListener('load', () => {
                     })
                 });
 
+                // Vid lyckad uppdatering, visa en bekräftelse och uppdatera bokningslistorna
                 showToast('Bokningen uppdaterades', 'success');
                 if (editBookingModal) editBookingModal.close();
                 editBookingForm.reset();
@@ -951,20 +1122,23 @@ window.addEventListener('load', () => {
     }
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // CAR RENTAL LOGIC (STANDARD GALLERY)
+    // BILUTHYRNINGSLOGIK - STANDARD GALLERY
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // Funktion för att hämta bilar från API:et och rendera galleriet
     function fetchCars() {
         const carsContainer = document.getElementById('cars-container');
         if (carsContainer) {
             carsContainer.innerHTML = '<div class="loader" style="margin: 2rem auto;"></div>';
         }
 
+        // Hämta bilar från API:et
         apiFetch(`${API_BASE}/cars`)
             .then(res => res.json())
             .then(data => {
                 state.cars = data;
                 renderGallery();
             })
+            // Vid fel, logga det, visa ett användarvänligt meddelande och rendera en tom state
             .catch(err => {
                 console.warn('Kunde inte hämta bilar:', err.message);
                 showToast('Kunde inte nå servern.', 'error');
@@ -973,6 +1147,25 @@ window.addEventListener('load', () => {
             });
     }
 
+// ──────────────────────────────────────────────────────────────────────────────────────────────
+// SVG-PLATSHÅLLARE FÖR BILAR UTAN BILD
+// ──────────────────────────────────────────────────────────────────────────────────────────────
+function renderPlaceholderSVG(color = '#e69d67') {
+    return `<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"
+                 aria-hidden="true" focusable="false"
+                 style="width:80%;height:80%;opacity:0.25;">
+        <rect x="5" y="22" width="110" height="34" rx="5"
+              fill="none" stroke="${color}" stroke-width="2"/>
+        <polygon points="18,22 28,6 92,6 102,22"
+                 fill="none" stroke="${color}" stroke-width="2"/>
+        <circle cx="28" cy="58" r="8" fill="none" stroke="${color}" stroke-width="2"/>
+        <circle cx="92" cy="58" r="8" fill="none" stroke="${color}" stroke-width="2"/>
+        <rect x="42" y="10" width="36" height="12" rx="2"
+              fill="none" stroke="${color}" stroke-width="1.5" opacity="0.5"/>
+    </svg>`;
+}
+
+    // Funktion för att bygga HTML-innehållet för en bil i galleriet
     function buildFloatCard(car) {
         const imageSrc = car.imageUrl || car.image || '';
         const hasImage = Boolean(imageSrc);
@@ -1027,6 +1220,21 @@ window.addEventListener('load', () => {
             </article>`;
     }
 
+    // Funktion för att uppdatera sorteringsknappens ikon och aria-label baserat på sorteringsordningen
+    function updateSortDirBtn() {
+        const btn = document.getElementById('sort-dir-btn');
+        if (!btn) return;
+        const icon = btn.querySelector('i');
+        if (state.carSortDesc) {
+            if (icon) { icon.className = 'bi bi-sort-alpha-down-alt'; }
+            btn.setAttribute('aria-label', 'Byt sorteringsordning: fallande');
+        } else {
+            if (icon) { icon.className = 'bi bi-sort-alpha-down'; }
+            btn.setAttribute('aria-label', 'Byt sorteringsordning: stigande');
+        }
+    }
+
+    // Funktion för att rendera galleriet med bilar
     function renderGallery() {
         const container = document.getElementById('cars-container');
         if (!container) return;
@@ -1040,6 +1248,7 @@ window.addEventListener('load', () => {
             return;
         }
 
+        // Sortera bilarna baserat på valt sorteringsfält och ordning
         const sorted = [...state.cars];
         sorted.sort((a, b) => {
             let v1 = a[state.carSortBy];
@@ -1051,31 +1260,37 @@ window.addEventListener('load', () => {
             return 0;
         });
 
+        // Bygg HTML-innehållet för varje bil och uppdatera galleriet
         container.innerHTML = sorted.map(buildFloatCard).join('');
     }
 
 
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // ADMIN DASHBOARD LOGIC
+    // ADMIN DASHBOARD-LOGIK
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     function fetchAdminCars() {
         const tbody = document.getElementById('admin-cars-tbody');
-        if (!tbody) return;
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;"><div class="loader" style="margin: 1rem auto;"></div></td></tr>';
 
+        // Visa laddare om tabellen är synlig — men hämta data oavsett
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;"><div class="loader" style="margin: 1rem auto;"></div></td></tr>';
+        }
+
+        // Hämta bilar från API:et
         apiFetch(`${API_BASE}/cars`)
             .then(res => res.json())
             .then(data => {
                 state.cars = data;
-                renderAdminCars();
+                if (tbody) renderAdminCars();
             })
             .catch(err => {
                 console.warn('Kunde inte hämta bilar:', err.message);
-                renderAdminCars();
+                if (tbody) renderAdminCars();
             });
     }
 
+    // Funktion för att rendera bilar i admin-tabellen
     function renderAdminCars() {
         const tbody = document.getElementById('admin-cars-tbody');
         if (!tbody) return;
@@ -1091,11 +1306,13 @@ window.addEventListener('load', () => {
             return 0;
         });
 
+        // Om inga bilar hittades, visa ett meddelande i tabellen
         if (sorted.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6">Inga bilar hittades.</td></tr>';
             return;
         }
 
+        // Bygg HTML-innehållet för varje bil i tabellen
         tbody.innerHTML = sorted.map(car => `
             <tr>
                 <td>${car.id}</td>
@@ -1118,6 +1335,7 @@ window.addEventListener('load', () => {
             </tr>
         `).join('');
 
+        // Uppdatera sorteringsknapparnas ikoner och aria-sort attribut baserat på aktuell sortering
         document.querySelectorAll('#admin-cars-table th.sortable').forEach(th => {
             th.classList.remove('sort-asc', 'sort-desc');
             th.removeAttribute('aria-sort');
@@ -1131,11 +1349,13 @@ window.addEventListener('load', () => {
         });
     }
 
+    // Funktion för att hämta användare från API:et
     function fetchAdminUsers() {
         const tbody = document.getElementById('admin-users-tbody');
         if (!tbody) return;
         tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;"><div class="loader" style="margin: 1rem auto;"></div></td></tr>';
 
+        // Hämta användare från API:et
         apiFetch(`${API_BASE}/users`)
             .then(res => res.json())
             .then(data => {
@@ -1148,6 +1368,7 @@ window.addEventListener('load', () => {
             });
     }
 
+    // Funktion för att rendera användare i admin-tabellen
     function renderAdminUsers() {
         const tbody = document.getElementById('admin-users-tbody');
         if (!tbody) return;
@@ -1163,16 +1384,22 @@ window.addEventListener('load', () => {
             return 0;
         });
 
+        // Om inga användare hittades, visa ett meddelande i tabellen
         if (sorted.length === 0) {
             tbody.innerHTML = '<tr><td colspan="4">Inga användare hittades.</td></tr>';
             return;
         }
 
+        // Bygg HTML-innehållet för varje användare i tabellen
         tbody.innerHTML = sorted.map(user => `
             <tr>
                 <td>${user.id}</td>
-                <td>${user.username || '-'}</td>
-                <td>${(user.role || 'USER').toUpperCase()}</td>
+                <td><strong>${user.username || '-'}</strong></td>
+                <td>${user.firstName || '-'}</td>
+                <td>${user.lastName || '-'}</td>
+                <td>${user.email || '-'}</td>
+                <td>${user.noOfOrders ?? 0}</td>
+                <td>${(user.role || 'USER').replace('ROLE_', '')}</td>
                 <td style="white-space: nowrap;">
                     <button class="btn-icon edit-user-btn" data-id="${user.id}" data-name="${user.username}" title="Redigera">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
@@ -1184,6 +1411,7 @@ window.addEventListener('load', () => {
             </tr>
         `).join('');
 
+        // Uppdatera sorteringsknapparnas ikoner och aria-sort attribut baserat på aktuell sortering
         document.querySelectorAll('#admin-users-table th.sortable').forEach(th => {
             th.classList.remove('sort-asc', 'sort-desc');
             th.removeAttribute('aria-sort');
@@ -1197,15 +1425,23 @@ window.addEventListener('load', () => {
         });
     }
 
-    function fetchAdminBookings() {
-        if (state.cars.length === 0) {
-            fetchAdminCars();
-        }
-
+    // Funktion för att hämta bokningar från API:et
+    async function fetchAdminBookings() {
         const tbody = document.getElementById('admin-bookings-tbody');
         if (!tbody) return;
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;"><div class="loader" style="margin: 1rem auto;"></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;"><div class="loader" style="margin: 1rem auto;"></div></td></tr>';
 
+        // Ladda bilar om cache är tom — vänta på resultatet
+        if (state.cars.length === 0) {
+            try {
+                const carsRes = await apiFetch(`${API_BASE}/cars`);
+                state.cars = await carsRes.json();
+            } catch (err) {
+                console.warn('Kunde inte förhämta bilar:', err.message);
+            }
+        }
+
+        // Hämta bokningar från API:et
         apiFetch(`${API_BASE}/bookings`)
             .then(res => res.json())
             .then(data => {
@@ -1218,6 +1454,7 @@ window.addEventListener('load', () => {
             });
     }
 
+    // Funktion för att rendera bokningar i admin-tabellen
     function renderAdminBookings() {
         const tbody = document.getElementById('admin-bookings-tbody');
         if (!tbody) return;
@@ -1230,6 +1467,8 @@ window.addEventListener('load', () => {
                     return carObj ? `${carObj.name || ''} ${carObj.model || ''}`.trim() : item.carId || '';
                 }
                 if (key === 'user') return item.user?.username || item.userId || '';
+                if (key === 'startDate') return item.fromDate || '';
+                if (key === 'endDate') return item.toDate || '';
                 return item[key] || '';
             };
             let v1 = resolveValue(a, state.adminBookingsSortBy);
@@ -1241,15 +1480,25 @@ window.addEventListener('load', () => {
             return 0;
         });
 
+        // Om inga bokningar hittades, visa ett meddelande i tabellen
         if (sorted.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6">Inga bokningar hittades.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7">Inga bokningar hittades.</td></tr>';
             return;
         }
 
+        // Bygg HTML-innehållet för varje bokning i tabellen
         tbody.innerHTML = sorted.map(booking => {
             const carObj = booking.car || state.cars.find(c => c.id === booking.carId);
             const carInfo = carObj ? `${carObj.name || ''} ${carObj.model || ''}`.trim() : `Bil #${booking.carId}`;
             const userInfo = booking.user ? booking.user.username : booking.userId || '-';
+            const isActive = booking.active;
+            const statusBadge = isActive
+                ? `<span style="color: var(--color-positive);">Aktiv</span>`
+                : `<span style="color: var(--text-muted);">Avslutad</span>`;
+            const returnBtn = isActive
+                ? `<button class="btn-icon btn-secondary return-booking-btn" data-id="${booking.id}" title="Återlämna">                      
+                    </button>`
+                : '';
             return `
             <tr>
                 <td>${booking.id}</td>
@@ -1257,6 +1506,7 @@ window.addEventListener('load', () => {
                 <td>${userInfo}</td>
                 <td>${booking.fromDate || '-'}</td>
                 <td>${booking.toDate || '-'}</td>
+                <td>${statusBadge}</td>
                 <td style="white-space: nowrap;">
                     <button class="btn-icon edit-booking-btn" data-id="${booking.id}" title="Redigera">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
@@ -1264,11 +1514,13 @@ window.addEventListener('load', () => {
                     <button class="btn-icon danger delete-booking-btn" data-id="${booking.id}" title="Ta bort">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
+                    ${returnBtn}
                 </td>
             </tr>
         `;
         }).join('');
 
+        // Uppdatera sorteringsknapparnas ikoner och aria-sort attribut baserat på aktuell sortering
         document.querySelectorAll('#admin-bookings-table th.sortable').forEach(th => {
             th.classList.remove('sort-asc', 'sort-desc');
             th.removeAttribute('aria-sort');
@@ -1282,20 +1534,29 @@ window.addEventListener('load', () => {
         });
     }
 
-    function fetchUserBookings() {
+    // Funktion för att hämta användarens bokningar från API:et
+    async function fetchUserBookings() {
         const tbody = document.getElementById('user-bookings-tbody');
         if (!tbody) return;
         tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;"><div class="loader" style="margin: 1rem auto;"></div></td></tr>';
 
+        // Ladda bilar om cache är tom — vänta på resultatet
         if (!state.currentUser) {
             tbody.innerHTML = '<tr><td colspan="4">Logga in för att se dina bokningar.</td></tr>';
             return;
         }
 
+        // Ladda bilar om cache är tom — vänta på resultatet
         if (state.cars.length === 0) {
-            fetchAdminCars();
+            try {
+                const carsRes = await apiFetch(`${API_BASE}/cars`);
+                state.cars = await carsRes.json();
+            } catch (err) {
+                console.warn('Kunde inte förhämta bilar:', err.message);
+            }
         }
 
+        // Hämta användarens bokningar från API:et
         apiFetch(`${API_BASE}/bookings/me`)
             .then(res => res.json())
             .then(data => {
@@ -1316,32 +1577,45 @@ window.addEventListener('load', () => {
             });
     }
 
+    // Funktion för att rendera användarens bokningar i listan
     function renderUserBookings() {
         const tbody = document.getElementById('user-bookings-tbody');
         if (!tbody) return;
         if (!state.currentUser) {
-            tbody.innerHTML = '<tr><td colspan="4">Logga in för att se dina bokningar.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6">Logga in för att se dina bokningar.</td></tr>';
             return;
         }
 
         const bookings = state.userBookings;
 
+        // Om inga bokningar hittades, visa ett meddelande i listan
         if (!bookings || bookings.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4">Du har inga bokningar.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6">Du har inga bokningar.</td></tr>';
             return;
         }
 
+        // Bygg HTML-innehållet för varje bokning i listan
         tbody.innerHTML = bookings.map(booking => {
             const carObj = state.cars.find(c => c.id === booking.carId);
             const carInfo = carObj ? `${carObj.name} ${carObj.model || ''}`.trim() : `Bil #${booking.carId}`;
+            const isActive = booking.active;
+            const statusBadge = isActive
+                ? `<span style="color: var(--color-positive);">Aktiv</span>`
+                : `<span style="color: var(--text-muted);">Avslutad</span>`;
+            const returnBtn = isActive
+                ? `<button class="btn btn-secondary return-car-btn" data-id="${booking.id}"
+                           aria-label="Återlämna bokning ${booking.id}">Återlämna</button>`
+                : `<span style="color: var(--text-muted); font-size: 0.85rem;">—</span>`;
             return `
-            <tr>
-                <td>${booking.id}</td>
-                <td>${carInfo}</td>
-                <td>${booking.fromDate || '-'}</td>
-                <td>${booking.toDate || '-'}</td>
-            </tr>
-        `;
+                <tr>
+                    <td>${booking.id}</td>
+                    <td>${carInfo}</td>
+                    <td>${booking.fromDate || '-'}</td>
+                    <td>${booking.toDate || '-'}</td>
+                    <td>${statusBadge}</td>
+                    <td>${returnBtn}</td>
+                </tr>
+            `;
         }).join('');
     }
 
@@ -1363,6 +1637,6 @@ window.addEventListener('load', () => {
             setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
-
+    
     updateNavVisibility();
 });
