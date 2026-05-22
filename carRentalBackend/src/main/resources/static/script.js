@@ -16,11 +16,48 @@ const state = {
     adminUsersSortDesc: false,
     adminBookingsSortBy: 'id',
     adminBookingsSortDesc: false,
+    adminBookingsFilter: 'all',
     userBookingsSortBy: 'startDate',
     userBookingsSortDesc: false
 };
 
+// ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+// SORTERINGSFUNKTION - Generisk sortering av arrayer baserat på en nyckel och sorteringsordning
+// ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+function sortData(arr, key, desc) {
+    return [...arr].sort((a, b) => {
+        let v1 = a[key];
+        let v2 = b[key];
+        if (typeof v1 === 'string') v1 = v1.toLowerCase();
+        if (typeof v2 === 'string') v2 = v2.toLowerCase();
+        if (v1 < v2) return desc ? 1 : -1;
+        if (v1 > v2) return desc ? -1 : 1;
+        return 0;
+    });
+}
+
+// ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+// ARIA-SORT HJÄLP - Uppdaterar aria-sort och sorteringsklasser på tabellhuvuden
+// ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+function updateAriaSortHeaders(tableId, sortBy, sortDesc) {
+    document.querySelectorAll(`#${tableId} th.sortable`).forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        th.removeAttribute('aria-sort');
+        if (th.getAttribute('data-col') === sortBy) {
+            const dir = sortDesc ? 'descending' : 'ascending';
+            th.classList.add(sortDesc ? 'sort-desc' : 'sort-asc');
+            th.setAttribute('aria-sort', dir);
+        } else {
+            th.setAttribute('aria-sort', 'none');
+        }
+    });
+}
+
+// ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+// API-BASE - Bas-URL för alla API-anrop, lätt att ändra vid behov
+// ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 const API_BASE = 'http://localhost:8080/api/v1';
+
 
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 // SESSIONSHANTERING - Sparar inloggningsstatus i localStorage
@@ -188,9 +225,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // Ladda data för sektionen vid navigering
         if (actualSectionId === 'cars') fetchCars();
-        if (actualSectionId === 'admin-cars') fetchAdminCars();
+        if (actualSectionId === 'admin-cars') fetchCars('admin');
         if (actualSectionId === 'admin-users') fetchAdminUsers();
-        if (actualSectionId === 'admin-bookings') fetchAdminBookings();
+        if (actualSectionId === 'admin-bookings') fetchAdminBookingsByFilter();
         if (actualSectionId === 'mina-sidor') fetchUserBookings();
 
         // Om användaren navigerar till login-sektionen, fokusera på användarnamn-inputen
@@ -203,7 +240,7 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // GLOBALA KLICK-LYSSNARE - Hantera all klick-interaktion på ett ställe
+    // GLOBALA KLICK-LYSSNARE - Hantera all klick-interaktion
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     document.body.addEventListener('click', (e) => {
 
@@ -253,19 +290,6 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // ─── TABELLSORTERING FÖR BIL-LISTAN ──────────────────────────────────────────────────────────────────────────────────
-        const carTh = e.target.closest('#cars-table th.sortable');
-        if (carTh) {
-            const col = carTh.getAttribute('data-col');
-            if (state.carSortBy === col) {
-                state.carSortDesc = !state.carSortDesc;
-            } else {
-                state.carSortBy = col;
-                state.carSortDesc = false;
-            }
-            renderCars();
-        }
-
         // ─── TABELLSORTERING FÖR ADMIN-BILAR ─────────────────────────────────────────────────────────────────────────────────
         const adminCarTh = e.target.closest('#admin-cars-table th.sortable');
         if (adminCarTh) {
@@ -305,6 +329,21 @@ window.addEventListener('DOMContentLoaded', () => {
             renderAdminBookings();
         }
 
+        // ─── ADMIN - FILTRERA BOKNINGAR ──────────────────────────────────────────
+        const bookingFilterBtn = e.target.closest('.booking-filter-btn');
+        if (bookingFilterBtn) {
+            const filter = bookingFilterBtn.getAttribute('data-filter');
+            state.adminBookingsFilter = filter;
+
+            document.querySelectorAll('.booking-filter-btn').forEach(btn => {
+                const isActive = btn.getAttribute('data-filter') === filter;
+                btn.classList.toggle('active-sort', isActive);
+                btn.setAttribute('aria-pressed', String(isActive));
+            });
+
+            fetchAdminBookingsByFilter();
+        }
+
         // ─── SORTERING AV KUNDGALLERIET — SORTKNAPP ──────────────────────────────────────────────────────────────────────────
         const sortCarBtn = e.target.closest('.sort-cars-btn');
         if (sortCarBtn) {
@@ -320,15 +359,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 btn.classList.toggle('active-sort', isActive);
                 btn.setAttribute('aria-pressed', String(isActive));
             });
-            updateSortDirBtn();
-            renderGallery();
-        }
-
-        // ─── SORTERING AV KUNDGALLERIET — RIKTNINGSKNAPP ─────────────────────────────────────────────────────────────────────
-        const sortDirBtn = e.target.closest('#sort-dir-btn');
-        if (sortDirBtn) {
-            state.carSortDesc = !state.carSortDesc;
-            updateSortDirBtn();
             renderGallery();
         }
 
@@ -406,7 +436,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 onConfirm: async () => {
                     await apiFetch(`${API_BASE}/cars/${carId}`, {method: 'DELETE'});
                     showToast('Bilen har tagits bort från systemet', 'success');
-                    fetchAdminCars();
+                    fetchCars('admin');
                     fetchCars();
                 }
             });
@@ -448,6 +478,14 @@ window.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // ─── ADMIN - VISA BOKNINGAR FÖR ANVÄNDARE ────────────────────────────────
+        const viewUserBookingsBtn = e.target.closest('.view-user-bookings-btn');
+        if (viewUserBookingsBtn) {
+            const userId = viewUserBookingsBtn.getAttribute('data-id');
+            const userName = viewUserBookingsBtn.getAttribute('data-name');
+            openUserBookingsModal(userId, userName);
+        }
+
         // ─── ADMIN - Redigera bokning ───────────────────────────────────────────────────────────────────────────────────────
         const editBookingBtn = e.target.closest('.edit-booking-btn');
         if (editBookingBtn) {
@@ -475,7 +513,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 onConfirm: async () => {
                     await apiFetch(`${API_BASE}/bookings/${bookingId}`, {method: 'DELETE'});
                     showToast('Bokningen togs bort', 'success');
-                    fetchAdminBookings();
+                    fetchAdminBookingsByFilter();
                     fetchUserBookings();
                 }
             });
@@ -492,7 +530,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 onConfirm: async () => {
                     await apiFetch(`${API_BASE}/bookings/return/${bookingId}`, { method: 'PUT' });
                     showToast('Bokningen markerades som återlämnad.', 'success');
-                    fetchAdminBookings();
+                    fetchAdminBookingsByFilter();
                     fetchUserBookings();
                     fetchCars();
                 }
@@ -800,7 +838,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (addCarModal) addCarModal.close();
                 addCarForm.reset();
 
-                fetchAdminCars();
+                fetchCars('admin');
                 fetchCars();
             } catch (err) {
                 console.error(err);
@@ -1072,6 +1110,15 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Hantera stängning av användarens bokningsmodal
+    const closeUserBookingsModalBtn = document.getElementById('close-user-bookings-modal-btn');
+    const userBookingsModal = document.getElementById('user-bookings-modal');
+    if (closeUserBookingsModalBtn && userBookingsModal) {
+        closeUserBookingsModalBtn.addEventListener('click', () => {
+            userBookingsModal.close();
+        });
+    }
+
     // Hantera ändringar i start- och slutdatum
     if (editBookingStart && editBookingEnd) {
         editBookingStart.addEventListener('change', function () {
@@ -1112,7 +1159,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 showToast('Bokningen uppdaterades', 'success');
                 if (editBookingModal) editBookingModal.close();
                 editBookingForm.reset();
-                fetchAdminBookings();
+                fetchAdminBookingsByFilter();
                 fetchUserBookings();
             } catch (err) {
                 console.error(err);
@@ -1127,28 +1174,41 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // BILUTHYRNINGSLOGIK - STANDARD GALLERY
+    // BILUTHYRNINGSLOGIK - Hämtar och renderar bilar i både galleri- och adminvyer
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // Funktion för att hämta bilar från API:et och rendera galleriet
-    function fetchCars() {
-        const carsContainer = document.getElementById('cars-container');
-        if (carsContainer) {
-            carsContainer.innerHTML = '<div class="loader" style="margin: 2rem auto;"></div>';
+    
+    function fetchCars(renderTarget = 'gallery') {
+        if (renderTarget === 'gallery') {
+            const carsContainer = document.getElementById('cars-container');
+            if (carsContainer) {
+                carsContainer.innerHTML = '<div class="loader" style="margin: 2rem auto;"></div>';
+            }
+        } else {
+            const tbody = document.getElementById('admin-cars-tbody');
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><div class="loader" style="margin:1rem auto;"></div></td></tr>';
+            }
         }
 
-        // Hämta bilar från API:et
         apiFetch(`${API_BASE}/cars`)
             .then(res => res.json())
             .then(data => {
                 state.cars = data;
-                renderGallery();
+                if (renderTarget === 'admin') {
+                    renderAdminCars();
+                } else {
+                    renderGallery();
+                }
             })
-            // Vid fel, logga det, visa ett användarvänligt meddelande och rendera en tom state
             .catch(err => {
                 console.warn('Kunde inte hämta bilar:', err.message);
-                showToast('Kunde inte nå servern.', 'error');
-                state.cars = [];
-                renderGallery();
+                if (renderTarget === 'gallery') {
+                    showToast('Kunde inte nå servern.', 'error');
+                    state.cars = [];
+                    renderGallery();
+                } else {
+                    renderAdminCars();
+                }
             });
     }
 
@@ -1225,20 +1285,6 @@ function renderPlaceholderSVG(color = '#e69d67') {
             </article>`;
     }
 
-    // Funktion för att uppdatera sorteringsknappens ikon och aria-label baserat på sorteringsordningen
-    function updateSortDirBtn() {
-        const btn = document.getElementById('sort-dir-btn');
-        if (!btn) return;
-        const icon = btn.querySelector('i');
-        if (state.carSortDesc) {
-            if (icon) { icon.className = 'bi bi-sort-alpha-down-alt'; }
-            btn.setAttribute('aria-label', 'Byt sorteringsordning: fallande');
-        } else {
-            if (icon) { icon.className = 'bi bi-sort-alpha-down'; }
-            btn.setAttribute('aria-label', 'Byt sorteringsordning: stigande');
-        }
-    }
-
     // Funktion för att rendera galleriet med bilar
     function renderGallery() {
         const container = document.getElementById('cars-container');
@@ -1254,16 +1300,7 @@ function renderPlaceholderSVG(color = '#e69d67') {
         }
 
         // Sortera bilarna baserat på valt sorteringsfält och ordning
-        const sorted = [...state.cars];
-        sorted.sort((a, b) => {
-            let v1 = a[state.carSortBy];
-            let v2 = b[state.carSortBy];
-            if (typeof v1 === 'string') v1 = v1.toLowerCase();
-            if (typeof v2 === 'string') v2 = v2.toLowerCase();
-            if (v1 < v2) return state.carSortDesc ? 1 : -1;
-            if (v1 > v2) return state.carSortDesc ? -1 : 1;
-            return 0;
-        });
+        const sorted = sortData(state.cars, state.carSortBy, state.carSortDesc);
 
         // Bygg HTML-innehållet för varje bil och uppdatera galleriet
         container.innerHTML = sorted.map(buildFloatCard).join('');
@@ -1274,42 +1311,12 @@ function renderPlaceholderSVG(color = '#e69d67') {
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     // ADMIN DASHBOARD-LOGIK
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    function fetchAdminCars() {
-        const tbody = document.getElementById('admin-cars-tbody');
-
-        // Visa laddare om tabellen är synlig — men hämta data oavsett
-        if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;"><div class="loader" style="margin: 1rem auto;"></div></td></tr>';
-        }
-
-        // Hämta bilar från API:et
-        apiFetch(`${API_BASE}/cars`)
-            .then(res => res.json())
-            .then(data => {
-                state.cars = data;
-                if (tbody) renderAdminCars();
-            })
-            .catch(err => {
-                console.warn('Kunde inte hämta bilar:', err.message);
-                if (tbody) renderAdminCars();
-            });
-    }
-
     // Funktion för att rendera bilar i admin-tabellen
     function renderAdminCars() {
         const tbody = document.getElementById('admin-cars-tbody');
         if (!tbody) return;
 
-        let sorted = [...state.cars];
-        sorted.sort((a, b) => {
-            let v1 = a[state.adminSortBy];
-            let v2 = b[state.adminSortBy];
-            if (typeof v1 === 'string') v1 = v1.toLowerCase();
-            if (typeof v2 === 'string') v2 = v2.toLowerCase();
-            if (v1 < v2) return state.adminSortDesc ? 1 : -1;
-            if (v1 > v2) return state.adminSortDesc ? -1 : 1;
-            return 0;
-        });
+        let sorted = sortData(state.cars, state.adminSortBy, state.adminSortDesc);
 
         // Om inga bilar hittades, visa ett meddelande i tabellen
         if (sorted.length === 0) {
@@ -1326,32 +1333,23 @@ function renderPlaceholderSVG(color = '#e69d67') {
                 <td>${car.price} kr</td>
                 <td>
                     ${car.booked ?
-            '<span style="color: var(--color-negative);">Bokad</span>' :
-            '<span style="color: var(--color-positive);">Ledig</span>'}
+            '<span class="status-booked">Bokad</span>' :
+            '<span class="status-free">Ledig</span>'}
                 </td>
                 <td style="white-space: nowrap;">
-                    <button class="btn-icon edit-car-btn" data-id="${car.id}" title="Redigera">
+                    <button class="btn-icon edit-car-btn" data-id="${car.id}"
+                            aria-label="Redigera ${car.name}" title="Redigera">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                     </button>
-                    <button class="btn-icon danger delete-car-btn" data-id="${car.id}" data-name="${car.name} ${car.model || ''}" title="Ta bort">
+                    <button class="btn-icon danger delete-car-btn" data-id="${car.id}" data-name="${car.name} ${car.model || ''}"
+                            aria-label="Ta bort ${car.name}" title="Ta bort">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                 </td>
             </tr>
         `).join('');
 
-        // Uppdatera sorteringsknapparnas ikoner och aria-sort attribut baserat på aktuell sortering
-        document.querySelectorAll('#admin-cars-table th.sortable').forEach(th => {
-            th.classList.remove('sort-asc', 'sort-desc');
-            th.removeAttribute('aria-sort');
-            if (th.getAttribute('data-col') === state.adminSortBy) {
-                const dir = state.adminSortDesc ? 'descending' : 'ascending';
-                th.classList.add(state.adminSortDesc ? 'sort-desc' : 'sort-asc');
-                th.setAttribute('aria-sort', dir);
-            } else {
-                th.setAttribute('aria-sort', 'none');
-            }
-        });
+        updateAriaSortHeaders('admin-cars-table', state.adminSortBy, state.adminSortDesc);
     }
 
     // Funktion för att hämta användare från API:et
@@ -1378,16 +1376,7 @@ function renderPlaceholderSVG(color = '#e69d67') {
         const tbody = document.getElementById('admin-users-tbody');
         if (!tbody) return;
 
-        let sorted = [...state.users];
-        sorted.sort((a, b) => {
-            let v1 = a[state.adminUsersSortBy];
-            let v2 = b[state.adminUsersSortBy];
-            if (typeof v1 === 'string') v1 = v1.toLowerCase();
-            if (typeof v2 === 'string') v2 = v2.toLowerCase();
-            if (v1 < v2) return state.adminUsersSortDesc ? 1 : -1;
-            if (v1 > v2) return state.adminUsersSortDesc ? -1 : 1;
-            return 0;
-        });
+        let sorted = sortData(state.users, state.adminUsersSortBy, state.adminUsersSortDesc);
 
         // Om inga användare hittades, visa ett meddelande i tabellen
         if (sorted.length === 0) {
@@ -1406,28 +1395,23 @@ function renderPlaceholderSVG(color = '#e69d67') {
                 <td>${user.noOfOrders ?? 0}</td>
                 <td>${(user.role || 'USER').replace('ROLE_', '')}</td>
                 <td style="white-space: nowrap;">
-                    <button class="btn-icon edit-user-btn" data-id="${user.id}" data-name="${user.username}" title="Redigera">
+                    <button class="btn-icon edit-user-btn" data-id="${user.id}" data-name="${user.username}"
+                            aria-label="Redigera ${user.username}" title="Redigera">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                     </button>
-                    <button class="btn-icon danger delete-user-btn" data-id="${user.id}" data-name="${user.username}" title="Ta bort">
+                    <button class="btn-icon view-user-bookings-btn" data-id="${user.id}" data-name="${user.username}"
+                            aria-label="Visa bokningar för ${user.username}" title="Visa bokningar">
+                        <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                    </button>
+                    <button class="btn-icon danger delete-user-btn" data-id="${user.id}" data-name="${user.username}"
+                            aria-label="Ta bort ${user.username}" title="Ta bort">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                 </td>
             </tr>
         `).join('');
 
-        // Uppdatera sorteringsknapparnas ikoner och aria-sort attribut baserat på aktuell sortering
-        document.querySelectorAll('#admin-users-table th.sortable').forEach(th => {
-            th.classList.remove('sort-asc', 'sort-desc');
-            th.removeAttribute('aria-sort');
-            if (th.getAttribute('data-col') === state.adminUsersSortBy) {
-                const dir = state.adminUsersSortDesc ? 'descending' : 'ascending';
-                th.classList.add(state.adminUsersSortDesc ? 'sort-desc' : 'sort-asc');
-                th.setAttribute('aria-sort', dir);
-            } else {
-                th.setAttribute('aria-sort', 'none');
-            }
-        });
+        updateAriaSortHeaders('admin-users-table', state.adminUsersSortBy, state.adminUsersSortDesc);
     }
 
     // Funktion för att hämta bokningar från API:et
@@ -1459,7 +1443,107 @@ function renderPlaceholderSVG(color = '#e69d67') {
             });
     }
 
-    // Funktion för att rendera bokningar i admin-tabellen
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // ADMIN: FILTRERA BOKNINGAR - Hantera filtrering av bokningar i adminvyn
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
+    async function fetchAdminBookingsByFilter() {
+        const tbody = document.getElementById('admin-bookings-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;"><div class="loader" style="margin:1rem auto;"></div></td></tr>';
+
+        // Förhämta bilar om cache är tom
+        if (state.cars.length === 0) {
+            try {
+                const carsRes = await apiFetch(`${API_BASE}/cars`);
+                state.cars = await carsRes.json();
+            } catch (err) {
+                console.warn('Kunde inte förhämta bilar:', err.message);
+            }
+        }
+
+        const endpoint = state.adminBookingsFilter === 'active'
+            ? `${API_BASE}/bookings/active`
+            : `${API_BASE}/bookings`;
+
+        apiFetch(endpoint)
+            .then(res => res.json())
+            .then(data => {
+                state.bookings = data;
+                renderAdminBookings();
+            })
+            .catch(err => {
+                console.warn('Kunde inte hämta bokningar:', err.message);
+                renderAdminBookings();
+            });
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // ADMIN: VISA ANVÄNDBOKNINGAR - Hantera visning av en specifik användares bokningar i en dialog
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
+    async function openUserBookingsModal(userId, userName) {
+        const modal = document.getElementById('user-bookings-modal');
+        const tbody = document.getElementById('user-bookings-modal-tbody');
+        const usernameSpan = document.getElementById('modal-username');
+
+        if (!modal || !tbody) return;
+
+        if (usernameSpan) usernameSpan.textContent = userName;
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><div class="loader" style="margin:1rem auto;"></div></td></tr>';
+        modal.showModal();
+
+        if (state.cars.length === 0) {
+            try {
+                const carsRes = await apiFetch(`${API_BASE}/cars`);
+                state.cars = await carsRes.json();
+            } catch (err) {
+                console.warn('Kunde inte förhämta bilar:', err.message);
+            }
+        }
+
+        try {
+            const res = await apiFetch(`${API_BASE}/bookings/user/${userId}`);
+            const bookings = await res.json();
+
+            if (!bookings || bookings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">Inga bokningar hittades för denna användare.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = bookings.map(booking => {
+                const carObj = state.cars.find(c => c.id === booking.carId);
+                const carInfo = carObj
+                    ? `${carObj.name} ${carObj.model || ''}`.trim()
+                    : `Bil #${booking.carId}`;
+                const isActive = booking.active;
+                const statusBadge = isActive
+                    ? `<span class="status-active">Aktiv</span>`
+                    : `<span class="status-inactive">Avslutad</span>`;
+
+                return `
+                    <tr>
+                        <td>${booking.id}</td>
+                        <td>${carInfo}</td>
+                        <td>${booking.fromDate || '-'}</td>
+                        <td>${booking.toDate || '-'}</td>
+                        <td>${statusBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+
+        } catch (err) {
+            console.warn('Kunde inte hämta bokningar för användaren:', err.message);
+            if (err.status === 404) {
+                tbody.innerHTML = '<tr><td colspan="5">Inga bokningar hittades för denna användare.</td></tr>';
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5">Kunde inte hämta bokningar.</td></tr>';
+                showToast('Kunde inte hämta bokningar för användaren.', 'error');
+            }
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // ADMIN: RENDERA BOKNINGAR - Bygg och rendera bokningar i admin-tabellen
+    // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     function renderAdminBookings() {
         const tbody = document.getElementById('admin-bookings-tbody');
         if (!tbody) return;
@@ -1498,11 +1582,15 @@ function renderPlaceholderSVG(color = '#e69d67') {
             const userInfo = booking.user ? booking.user.username : booking.userId || '-';
             const isActive = booking.active;
             const statusBadge = isActive
-                ? `<span style="color: var(--color-positive);">Aktiv</span>`
-                : `<span style="color: var(--text-muted);">Avslutad</span>`;
+                ? `<span class="status-active">Aktiv</span>`
+                : `<span class="status-inactive">Avslutad</span>`;
             const returnBtn = isActive
-                ? `<button class="btn-icon btn-secondary return-booking-btn" data-id="${booking.id}" title="Återlämna">                      
-                    </button>`
+                ? `<button class="btn-icon btn-secondary return-booking-btn"
+                               data-id="${booking.id}"
+                               aria-label="Återlämna bokning ${booking.id}"
+                               title="Återlämna">
+                           <i class="bi bi-arrow-return-left" aria-hidden="true"></i>
+                       </button>`
                 : '';
             return `
             <tr>
@@ -1513,10 +1601,12 @@ function renderPlaceholderSVG(color = '#e69d67') {
                 <td>${booking.toDate || '-'}</td>
                 <td>${statusBadge}</td>
                 <td style="white-space: nowrap;">
-                    <button class="btn-icon edit-booking-btn" data-id="${booking.id}" title="Redigera">
+                    <button class="btn-icon edit-booking-btn" data-id="${booking.id}"
+                            aria-label="Redigera bokning ${booking.id}" title="Redigera">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                     </button>
-                    <button class="btn-icon danger delete-booking-btn" data-id="${booking.id}" title="Ta bort">
+                    <button class="btn-icon danger delete-booking-btn" data-id="${booking.id}"
+                            aria-label="Ta bort bokning ${booking.id}" title="Ta bort">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                     ${returnBtn}
@@ -1525,18 +1615,7 @@ function renderPlaceholderSVG(color = '#e69d67') {
         `;
         }).join('');
 
-        // Uppdatera sorteringsknapparnas ikoner och aria-sort attribut baserat på aktuell sortering
-        document.querySelectorAll('#admin-bookings-table th.sortable').forEach(th => {
-            th.classList.remove('sort-asc', 'sort-desc');
-            th.removeAttribute('aria-sort');
-            if (th.getAttribute('data-col') === state.adminBookingsSortBy) {
-                const dir = state.adminBookingsSortDesc ? 'descending' : 'ascending';
-                th.classList.add(state.adminBookingsSortDesc ? 'sort-desc' : 'sort-asc');
-                th.setAttribute('aria-sort', dir);
-            } else {
-                th.setAttribute('aria-sort', 'none');
-            }
-        });
+        updateAriaSortHeaders('admin-bookings-table', state.adminBookingsSortBy, state.adminBookingsSortDesc);
     }
 
     // Funktion för att hämta användarens bokningar från API:et
@@ -1605,8 +1684,8 @@ function renderPlaceholderSVG(color = '#e69d67') {
             const carInfo = carObj ? `${carObj.name} ${carObj.model || ''}`.trim() : `Bil #${booking.carId}`;
             const isActive = booking.active;
             const statusBadge = isActive
-                ? `<span style="color: var(--color-positive);">Aktiv</span>`
-                : `<span style="color: var(--text-muted);">Avslutad</span>`;
+                ? `<span class="status-active">Aktiv</span>`
+                : `<span class="status-inactive">Avslutad</span>`;
             const returnBtn = isActive
                 ? `<button class="btn btn-secondary return-car-btn" data-id="${booking.id}"
                            aria-label="Återlämna bokning ${booking.id}">Återlämna</button>`
