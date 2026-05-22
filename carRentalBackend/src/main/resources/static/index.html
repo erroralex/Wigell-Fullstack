@@ -273,6 +273,16 @@
     <section id="admin-bookings" class="page-section">
         <h2>Hantera Bokningar</h2>
         <p>Hantera alla bokningar i systemet.</p>
+        <!-- Filterverktyg för bokningar -->
+        <div class="sort-toolbar" role="group" aria-label="Filtrera bokningar" style="margin-bottom: 1rem;">
+            <span class="sort-toolbar__label">Visa:</span>
+            <button class="btn btn-generic booking-filter-btn active-sort"
+                    data-filter="all"
+                    aria-pressed="true">Alla</button>
+            <button class="btn btn-generic booking-filter-btn"
+                    data-filter="active"
+                    aria-pressed="false">Aktiva</button>
+        </div>
         <div class="table-responsive">
             <table class="table-long" id="admin-bookings-table">
                 <thead>
@@ -1686,6 +1696,36 @@
     </dialog>
 
 
+
+    <!-- ────────────────────────────────────────────────────────────── -->
+    <!-- Dialog: BOKNINGAR FÖR ANVÄNDARE (Admin)                        -->
+    <!-- ────────────────────────────────────────────────────────────── -->
+    <dialog id="user-bookings-modal" class="panel panel-neutral"
+            role="dialog" aria-modal="true"
+            aria-labelledby="user-bookings-modal-title">
+        <div class="dialog-body">
+            <h3 id="user-bookings-modal-title">Bokningar för <span id="modal-username"></span></h3>
+            <div class="table-responsive">
+                <table class="table-long" id="user-bookings-modal-table">
+                    <thead>
+                    <tr>
+                        <th>Boknings-ID</th>
+                        <th>Bil</th>
+                        <th>Startdatum</th>
+                        <th>Slutdatum</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody id="user-bookings-modal-tbody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="dialog-actions" style="margin-top: 1rem;">
+                <button type="button" class="btn btn-secondary"
+                        id="close-user-bookings-modal-btn">Stäng</button>
+            </div>
+        </div>
+    </dialog>
 
 </main>
 
