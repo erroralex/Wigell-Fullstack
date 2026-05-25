@@ -1709,3 +1709,16 @@ footer p {
 .status-inactive { color: var(--text-muted); }
 .status-booked   { color: var(--color-negative); }
 .status-free     { color: var(--color-positive); }
+
+/* ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   Annonskort – Knappvariant (cyan istället för koppar)
+   ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── */
+.float-card__cta--ad {
+    background: var(--color-function);
+    color: var(--bg);
+}
+
+.float-card--ad:hover .float-card__cta--ad {
+    background: var(--color-function) !important;
+    filter: brightness(1.15);
+}
