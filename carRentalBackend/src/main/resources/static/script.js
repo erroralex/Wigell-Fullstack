@@ -29,14 +29,14 @@ const ADS = [
     {
         title: 'Wigell Camping',
         tagline: 'Natur på riktigt',
-        features: ['Stugor & tomter', 'Sjönära läge', 'Familjevänligt'],
+        features: ['Tält och friluftsutrustning', 'Husbilar och husvagnar', 'Familjevänligt'],
         image: './images/wigell_camping_ad.png',
         url: 'https://wigellcamping.se'
     },    
     {
         title: 'SPRAY-ON SLIPS',
         tagline: 'Skräddarsy din stil på sekunder!',
-        features: ['Enkel att tvätta bort', 'Torr på minuter', 'Oändliga designval'],
+        features: ['Enkel att tvätta bort', 'Torr på minuter', 'Oändliga designmöjligheter'],
         image: './images/spray_on_ad.png',
         url: 'https://spray-on.se'
     },
@@ -88,7 +88,7 @@ async function ensureCarsLoaded() {
 
 
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-// UI-HJÄLPARE - Funktioner för att hantera användargränssnittet
+// UI-hjälpare - Funktioner för att hantera användargränssnittet
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 function openModal(id) {
     document.getElementById(id)?.showModal();
@@ -143,7 +143,7 @@ function showToast(message, type = 'success') {
 }
 
 
-// Hantera formulärsubmissions asynkront
+// Hantera formulärinlämningar asynkront
 async function handleAsyncSubmit(e, options) {
     e.preventDefault();
     const { form, submitLogic, successMsg, onSuccess, loadingText = 'Sparar...' } = options;
@@ -177,7 +177,7 @@ async function handleAsyncSubmit(e, options) {
 
 
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-// API & SESSION - Funktioner för att hantera API-anrop och användarsession
+// API och session - Funktioner för att hantera API-anrop och användarsession
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 const API_BASE = 'http://localhost:8080/api/v1';
 
@@ -208,7 +208,7 @@ function loadSession() {
 }
 
 
-// Wrapper för fetch som hanterar autentisering, JSON-body och felhantering
+// Funktion som paketerar fetch-anrop och hanterar autentisering, JSON-body och fel
 async function apiFetch(url, opts = {}) {
     const headers = {...opts.headers};
     if (state.credentials) headers['Authorization'] = `Basic ${state.credentials}`;
@@ -649,7 +649,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // GLOBAL KLICK-HANTERARE - Hanterar alla klick på sidan och delegerar till funktion baserat på vad som klickats på
+    // Global klickhanterare - Hanterar alla klick på sidan och delegerar till rätt funktion
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
     document.body.addEventListener('click', (e) => {
         if (handleRouting(e)) return;
@@ -666,7 +666,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // BEKRÄFTA-DIALOG LOGIK
+    // Bekräftelsedialoglogik
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     let confirmActionCallback = null;
 
@@ -711,7 +711,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // FORMULÄRHANTERING - Hantera datumbegränsningar, asynkrona formulärsubmissions och validering
+    // Formulärhantering - Datumbegränsningar, asynkrona formulärinlämningar och validering
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
     document.querySelectorAll('input[type="date"][id$="-start"], input[type="date"][id="start-date"]').forEach(input => {
         input.addEventListener('change', function () {
@@ -979,7 +979,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // HÄMTNINGS- OCH VISNINGSFUNKTIONER (API) - Funktioner som hämtar data från API:et och visar det i olika format
+    // Hämt- och visningsfunktioner (API) - Funktioner som hämtar data från API:et och visar det i olika format
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
     function fetchCars(renderTarget = 'gallery') {
         if (renderTarget === 'gallery') {
@@ -1303,7 +1303,7 @@ window.addEventListener('DOMContentLoaded', () => {
             return `<tr><td>${booking.id}</td><td>${carInfo}</td><td>${booking.fromDate || '-'}</td><td>${booking.toDate || '-'}</td><td>${statusBadge}</td><td>${returnBtn}</td></tr>`;
         }).join('');
     }
-    
+
 
     updateNavVisibility();
 });
