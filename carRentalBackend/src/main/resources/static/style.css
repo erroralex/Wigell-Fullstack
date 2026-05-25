@@ -145,6 +145,7 @@ strong {
     text-decoration: none;
     user-select: none;
     padding-top: 10px;
+    flex-shrink: 0;
 }
 
 .brand-logo .w {
@@ -307,7 +308,7 @@ header {
 }
 
 /* Desktop overrides */
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
     header {
         padding: 1.5rem 5%;
     }
@@ -772,9 +773,9 @@ main {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-   Desktop "overrides" (min-width: 768px)
+   Desktop "overrides" (min-width: 1024px)
    ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── */
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
     .example-nav-item {
         width: auto;
         flex-direction: row;
@@ -1182,7 +1183,7 @@ th.sortable.sort-asc::after {
     background: rgba(230, 157, 103, 0.05);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
     .table-long th, .table-long td {
         padding: 16px;
         font-size: 1rem;
@@ -1285,7 +1286,7 @@ th.sortable.sort-asc::after {
     grid-column: 1 / -1;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
     .css-var-row {
         grid-template-columns: 28px 220px 1fr;
         grid-template-rows: auto;
