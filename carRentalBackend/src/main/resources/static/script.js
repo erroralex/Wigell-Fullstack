@@ -1143,13 +1143,13 @@ window.addEventListener('DOMContentLoaded', () => {
                 <td>${user.noOfOrders ?? 0}</td>
                 <td>${(user.role || 'USER').replace('ROLE_', '')}</td>
                 <td style="white-space: nowrap;">
-                    <button class="btn-icon edit-user-btn" data-id="${user.id}" title="Redigera">
+                    <button class="btn-icon edit-user-btn" data-id="${user.id}" aria-label="Redigera användare ${user.username || user.id}" title="Redigera">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                     </button>
-                    <button class="btn-icon view-user-bookings-btn" data-id="${user.id}" data-name="${user.username}" title="Visa bokningar">
+                    <button class="btn-icon view-user-bookings-btn" data-id="${user.id}" data-name="${user.username}" aria-label="Visa bokningar för ${user.username || user.id}" title="Visa bokningar">
                         <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
                     </button>
-                    <button class="btn-icon danger delete-user-btn" data-id="${user.id}" data-name="${user.username}" title="Ta bort">
+                    <button class="btn-icon danger delete-user-btn" data-id="${user.id}" data-name="${user.username}" aria-label="Ta bort användare ${user.username || user.id}" title="Ta bort">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                 </td>
@@ -1213,7 +1213,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (key === 'user') return item.user?.username || item.userId || '';
                 if (key === 'startDate') return item.fromDate || '';
                 if (key === 'endDate') return item.toDate || '';
-                return item[key] || '';
+                return item[key] !== undefined && item[key] !== null ? item[key] : '';
             };
             let v1 = resolveValue(a, state.adminBookingsSortBy);
             let v2 = resolveValue(b, state.adminBookingsSortBy);
@@ -1234,7 +1234,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const carInfo = carObj ? `${carObj.name || ''} ${carObj.model || ''}`.trim() : `Bil #${booking.carId}`;
             const userInfo = booking.user ? booking.user.username : booking.userId || '-';
             const statusBadge = booking.active ? `<span class="status-active">Aktiv</span>` : `<span class="status-inactive">Avslutad</span>`;
-            const returnBtn = booking.active ? `<button class="btn-icon btn-secondary return-booking-btn" data-id="${booking.id}" title="Återlämna"><i class="bi bi-arrow-return-left" aria-hidden="true"></i></button>` : '';
+            const returnBtn = booking.active ? `<button class="btn-icon btn-secondary return-booking-btn" data-id="${booking.id}" aria-label="Återlämna bil för bokning ${booking.id}" title="Återlämna"><i class="bi bi-arrow-return-left" aria-hidden="true"></i></button>` : '';
             return `
             <tr>
                 <td>${booking.id}</td>
@@ -1244,10 +1244,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 <td>${booking.toDate || '-'}</td>
                 <td>${statusBadge}</td>
                 <td style="white-space: nowrap;">
-                    <button class="btn-icon edit-booking-btn" data-id="${booking.id}" title="Redigera">
+                    <button class="btn-icon edit-booking-btn" data-id="${booking.id}" aria-label="Redigera bokning ${booking.id}" title="Redigera">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                     </button>
-                    <button class="btn-icon danger delete-booking-btn" data-id="${booking.id}" title="Ta bort">
+                    <button class="btn-icon danger delete-booking-btn" data-id="${booking.id}" aria-label="Ta bort bokning ${booking.id}" title="Ta bort">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                     ${returnBtn}
