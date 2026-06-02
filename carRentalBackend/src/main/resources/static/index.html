@@ -231,6 +231,7 @@
                             <th>Bil</th>
                             <th>Startdatum</th>
                             <th>Slutdatum</th>
+                            <th>Kostnad</th>
                             <th>Status</th>
                             <th>Åtgärd</th>
                         </tr>
@@ -941,7 +942,7 @@
 
             <!-- Formulär -->
             <h3>Inmatningsformulär</h3>
-            <p>Textfält har en subtil underlinje som lyser upp vid fokus.
+            <p>Textfält har en yttre fokusring som lyser upp vid fokus.
                 Radioknappar och kryssrutor ersätts med Wigells diamantdesign.</p>
 
             <div class="panel-discrete max-w-500px">
@@ -966,11 +967,11 @@
                     <label>Flerval (Kryssruta)</label>
                     <label class="custom-check-label">
                         <input type="checkbox" checked />
-                        <span class="diamond-box"></span> Inkludera Logistik
+                        <span class="diamond-box"></span> Kostym
                     </label>
                     <label class="custom-check-label">
                         <input type="checkbox" />
-                        <span class="diamond-box"></span> Inkludera Kärndata
+                        <span class="diamond-box"></span> Väst
                     </label>
                 </div>
 
@@ -1025,7 +1026,7 @@
             width: 100%;
             transition: var(--transition);
         }
-        input[type="text"]:focus { border-bottom-color: var(--accent); }
+        input[type="text"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         
         /* Anpassad radio/checkbox med diamant */
         .custom-check-label {
@@ -1565,6 +1566,7 @@
                         <label for="end-date">Slutdatum</label>
                         <input type="date" id="end-date" required>
                     </div>
+                    <p class="text-muted">Alla bokningar är bindande. Mer info under villkor. Minsta hyrtid är 1 dygn.</p><br>
                     <div class="dialog-actions">
                         <button type="submit" class="btn btn-positive">Bekräfta</button>
                         <button type="button" class="btn btn-secondary" id="close-modal-btn">Avbryt</button>
@@ -1732,6 +1734,7 @@
                                 <th>Bil</th>
                                 <th>Startdatum</th>
                                 <th>Slutdatum</th>
+                                <th>Kostnad</th>
                                 <th>Status</th>
                             </tr>
                         </thead>

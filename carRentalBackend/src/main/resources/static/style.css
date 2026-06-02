@@ -1064,7 +1064,7 @@ input[type="tel"]:focus,
 input[type="date"]:focus,
 input[type="number"]:focus,
 select:focus {
-    border-bottom-color: var(--accent);
+    border-bottom: 2px solid var(--border) !important;
     background: #1f1f1f;
 }
 
@@ -1903,7 +1903,9 @@ footer p {
     border: 2px solid var(--text-muted) !important;
 }
 
-/* Uthyrnings-status */
+/* ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   Uthyrnings-status
+   ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── */
 .status-active {
     color: var(--color-positive);
 }
@@ -1936,12 +1938,13 @@ footer p {
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
    WCAG AAA Anpassningar för Inloggningssidan (#login)
    ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── */
+
+/* Kontrast 11.2:1 mot #2a2a2a (AAA godkänd) */
 #login .form-group>label {
     color: #ffffff;
-    /* Kontrast 11.2:1 mot #2a2a2a (AAA godkänd) */
 }
 
+/* Ljusrosa/korall för AAA-kontrast (> 7:1) mot #2a2a2a */
 #login-error {
     color: #ffa1a1 !important;
-    /* Ljusrosa/korall för AAA-kontrast (> 7:1) mot #2a2a2a */
 }

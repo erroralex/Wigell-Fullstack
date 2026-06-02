@@ -51,7 +51,7 @@ const ADS = [
 
 
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-// DATAHJÄLPARE - Funktioner för att sortera, hämta och säkerställa att data finns
+// DATAHJÄLPARE - Funktioner för att sortera, hämta och säkerställa att data finns samt räkna ut priser
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 function sortData(arr, key, desc) {
     return [...arr].sort((a, b) => {
@@ -87,8 +87,35 @@ async function ensureCarsLoaded() {
 }
 
 
+// Hanterar beräkningen av kostnad för en bokning, tar hänsyn till om bilen returneras i förtid
+function calculateBookingCost(booking, isReturningNow = false) {
+    if (!booking.fromDate || !booking.toDate) return 0;
+    const carObj = state.cars.find(c => c.id === booking.carId);
+    if (!carObj) return 0;
+    
+    const fromDate = new Date(booking.fromDate);
+    let toDate = new Date(booking.toDate);
+    
+    if (isReturningNow) {
+        const d = new Date();
+        const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        
+        if (todayStr < booking.toDate) {
+            const actualToDateStr = todayStr > booking.fromDate ? todayStr : booking.fromDate;
+            toDate = new Date(actualToDateStr);
+        }
+    }
+    
+    const diffTime = Math.abs(toDate - fromDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const days = Math.max(1, diffDays); // Minst 1 dygn
+    
+    return days * carObj.price;
+}
+
+
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-// UI-hjälpare - Funktioner för att hantera användargränssnittet
+// UI-HJÄLPARE - Funktioner för att hantera användargränssnittet
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 function openModal(id) {
     document.getElementById(id)?.showModal();
@@ -177,7 +204,7 @@ async function handleAsyncSubmit(e, options) {
 
 
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-// API och session - Funktioner för att hantera API-anrop och användarsession
+// API & SESSION - Funktioner för att hantera API-anrop och användarsession
 // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 const API_BASE = 'http://localhost:8080/api/v1';
 
@@ -631,18 +658,42 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // Återlämna bil
         const returnBtn = e.target.closest('.return-booking-btn') || e.target.closest('.return-car-btn');
-        if (handleDeleteOrReturn(returnBtn, {
-            title: 'Återlämna bil',
-            message: 'Bekräfta att du vill återlämna denna bokning.',
-            confirmLabel: 'Ja, återlämna',
-            onConfirm: async () => {
-                await apiFetch(`${API_BASE}/bookings/return/${returnBtn.getAttribute('data-id')}`, { method: 'PUT' });
-                showToast('Bilen har återlämnats!', 'success');
-                fetchAdminBookingsByFilter();
-                fetchUserBookings();
-                fetchCars();
+        if (returnBtn) {
+            const bookingId = parseInt(returnBtn.getAttribute('data-id'));
+            const booking = state.bookings.find(b => b.id === bookingId) || state.userBookings.find(b => b.id === bookingId);
+            let costMsg = '';
+            if (booking) {
+                const cost = calculateBookingCost(booking, true);
+                if (cost) {
+                    costMsg = ` Total kostnad: ${cost.toLocaleString('sv-SE')} kr.`;
+                }
             }
-        })) return true;
+            if (handleDeleteOrReturn(returnBtn, {
+                title: 'Återlämna bil',
+                message: `Bekräfta att du vill återlämna denna bokning.${costMsg}`,
+                confirmLabel: 'Ja, återlämna',
+                onConfirm: async () => {
+                    if (booking) {
+                        const d = new Date();
+                        const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                        if (todayStr < booking.toDate) {
+                            const actualToDateStr = todayStr > booking.fromDate ? todayStr : booking.fromDate;
+                            const updatedBooking = { ...booking, toDate: actualToDateStr };
+                            // Uppdatera toDate i backend först
+                            await apiFetch(`${API_BASE}/bookings/${bookingId}`, {
+                                method: 'PUT',
+                                body: JSON.stringify(updatedBooking)
+                            });
+                        }
+                    }
+                    await apiFetch(`${API_BASE}/bookings/return/${bookingId}`, { method: 'PUT' });
+                    showToast(`Bilen har återlämnats!${costMsg}`, 'success');
+                    fetchAdminBookingsByFilter();
+                    fetchUserBookings();
+                    fetchCars();
+                }
+            })) return true;
+        }
 
         return false;
     }
@@ -666,7 +717,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // Bekräftelsedialoglogik
+    // Bekräftelse-dialog logik
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     let confirmActionCallback = null;
 
@@ -912,7 +963,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const errorElement = document.getElementById('login-error');
             const btn = loginForm.querySelector('button[type="submit"]');
 
-            errorElement.style.display = 'none';
+            errorElement.classList.add('d-none');
             if (btn) { btn.disabled = true; btn.textContent = 'Loggar in…'; }
 
             try {
@@ -941,7 +992,8 @@ window.addEventListener('DOMContentLoaded', () => {
                     showToast(`Inloggad som ${data.username}`, 'success');
                 }
             } catch (error) {
-                errorElement.style.display = 'block';
+                errorElement.classList.remove('d-none');
+                showToast('Inloggningen misslyckades. Kontrollera användarnamn och lösenord.', 'error');
                 state.currentUser = null;
                 state.credentials = null;
             } finally {
@@ -979,7 +1031,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // Hämt- och visningsfunktioner (API) - Funktioner som hämtar data från API:et och visar det i olika format
+    // Hämtnings- och visningsfunktioner - Funktioner som hämtar data från API:et och visar det i olika format
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
     function fetchCars(renderTarget = 'gallery') {
         if (renderTarget === 'gallery') {
@@ -1176,7 +1228,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const usernameSpan = document.getElementById('modal-username');
         if (usernameSpan) usernameSpan.textContent = userName;
         
-        const tbody = setTableLoader('user-bookings-modal-tbody', 5);
+        const tbody = setTableLoader('user-bookings-modal-tbody', 6);
         openModal('user-bookings-modal');
 
         await ensureCarsLoaded();
@@ -1184,17 +1236,19 @@ window.addEventListener('DOMContentLoaded', () => {
         try {
             const bookings = await (await apiFetch(`${API_BASE}/bookings/user/${userId}`)).json();
             if (!bookings || bookings.length === 0) {
-                if(tbody) tbody.innerHTML = '<tr><td colspan="5">Inga bokningar hittades.</td></tr>';
+                if(tbody) tbody.innerHTML = '<tr><td colspan="6">Inga bokningar hittades.</td></tr>';
                 return;
             }
             if(tbody) tbody.innerHTML = bookings.map(booking => {
                 const carObj = state.cars.find(c => c.id === booking.carId);
                 const carInfo = carObj ? `${carObj.name} ${carObj.model || ''}`.trim() : `Bil #${booking.carId}`;
                 const statusBadge = booking.active ? `<span class="status-active">Aktiv</span>` : `<span class="status-inactive">Avslutad</span>`;
-                return `<tr><td>${booking.id}</td><td>${carInfo}</td><td>${booking.fromDate || '-'}</td><td>${booking.toDate || '-'}</td><td>${statusBadge}</td></tr>`;
+                const cost = calculateBookingCost(booking);
+                const costStr = cost ? `${cost.toLocaleString('sv-SE')} kr` : '—';
+                return `<tr><td>${booking.id}</td><td>${carInfo}</td><td>${booking.fromDate || '-'}</td><td>${booking.toDate || '-'}</td><td><strong>${costStr}</strong></td><td>${statusBadge}</td></tr>`;
             }).join('');
         } catch (error) {
-            if(tbody) tbody.innerHTML = error.status === 404 ? '<tr><td colspan="5">Inga bokningar hittades.</td></tr>' : '<tr><td colspan="5">Kunde inte hämta bokningar.</td></tr>';
+            if(tbody) tbody.innerHTML = error.status === 404 ? '<tr><td colspan="6">Inga bokningar hittades.</td></tr>' : '<tr><td colspan="6">Kunde inte hämta bokningar.</td></tr>';
         }
     }
 
@@ -1289,7 +1343,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (!tbody || !state.currentUser) return;
 
         if (!state.userBookings || state.userBookings.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6">Du har inga bokningar.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7">Du har inga bokningar.</td></tr>';
             return;
         }
 
@@ -1300,7 +1354,9 @@ window.addEventListener('DOMContentLoaded', () => {
             const returnBtn = booking.active 
                 ? `<button class="btn btn-secondary return-car-btn" data-id="${booking.id}">Återlämna</button>`
                 : `<span style="color: var(--text-muted); font-size: 0.85rem;">—</span>`;
-            return `<tr><td>${booking.id}</td><td>${carInfo}</td><td>${booking.fromDate || '-'}</td><td>${booking.toDate || '-'}</td><td>${statusBadge}</td><td>${returnBtn}</td></tr>`;
+            const cost = calculateBookingCost(booking);
+            const costStr = cost ? `${cost.toLocaleString('sv-SE')} kr` : '—';
+            return `<tr><td>${booking.id}</td><td>${carInfo}</td><td>${booking.fromDate || '-'}</td><td>${booking.toDate || '-'}</td><td><strong>${costStr}</strong></td><td>${statusBadge}</td><td>${returnBtn}</td></tr>`;
         }).join('');
     }
 
