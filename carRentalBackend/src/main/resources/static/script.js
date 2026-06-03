@@ -1328,11 +1328,11 @@ window.addEventListener('DOMContentLoaded', () => {
     async function fetchUserBookings() {
         const tbody = document.getElementById('user-bookings-tbody');
         if (!tbody || !state.currentUser) {
-            if(tbody) tbody.innerHTML = '<tr><td colspan="6">Logga in för att se dina bokningar.</td></tr>';
+            if(tbody) tbody.innerHTML = '<tr><td colspan="7">Logga in för att se dina bokningar.</td></tr>';
             return;
         }
 
-        setTableLoader('user-bookings-tbody', 6);
+        setTableLoader('user-bookings-tbody', 7);
         await ensureCarsLoaded();
 
         apiFetch(`${API_BASE}/bookings/me`)
