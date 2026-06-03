@@ -23,6 +23,9 @@
     /* Bilkort Dimensioner */
     --cw: 290px;
     --ch: 440px;
+
+    /* Färgschema */
+    color-scheme: dark;
 }
 
 * {
@@ -1670,6 +1673,14 @@ footer p {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
+    .loader {
+        animation: none;
+    }
+
+    .page-section {
+        animation: none;
+    }
 
     .float-card,
     .float-card:hover {
