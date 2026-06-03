@@ -346,6 +346,7 @@ window.addEventListener('DOMContentLoaded', () => {
             if (sec.id === actualSectionId) sec.classList.add('active');
         });
 
+        history.pushState(null, '', '#' + actualSectionId);
         window.scrollTo({top: 0, behavior: 'smooth'});
 
         if (actualSectionId === 'cars') fetchCars();
@@ -715,6 +716,11 @@ window.addEventListener('DOMContentLoaded', () => {
     if (currentHash) navigateTo(currentHash);
     else navigateTo('cars');
 
+    window.addEventListener('popstate', () => {
+        const hash = location.hash.substring(1) || 'cars';
+        navigateTo(hash);
+    });
+
 
     // ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     // Bekräftelse-dialog logik
@@ -932,11 +938,17 @@ window.addEventListener('DOMContentLoaded', () => {
             const startDate = document.getElementById('edit-booking-start').value;
             const endDate = document.getElementById('edit-booking-end').value;
 
+            const dateErr = document.getElementById('edit-booking-date-error');
             if (endDate <= startDate) {
                 e.preventDefault();
-                showToast('Slutdatum måste vara efter startdatum.', 'error');
+                if (dateErr) {
+                    dateErr.textContent = 'Slutdatum måste vara efter startdatum.';
+                    dateErr.classList.remove('d-none');
+                }
+                document.getElementById('edit-booking-end').focus();
                 return;
             }
+            if (dateErr) dateErr.classList.add('d-none');
 
             handleAsyncSubmit(e, {
                 form: editBookingForm,
