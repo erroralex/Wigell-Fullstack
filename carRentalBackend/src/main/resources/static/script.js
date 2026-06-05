@@ -10,8 +10,8 @@ const state = {
     users: [],
     carSortBy: 'name',
     carSortDesc: false,
-    adminSortBy: 'id',
-    adminSortDesc: false,
+    adminCarsSortBy: 'id',
+    adminCarsSortDesc: false,
     adminUsersSortBy: 'id',
     adminUsersSortDesc: false,
     adminBookingsSortBy: 'id',
@@ -341,6 +341,13 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        document.querySelectorAll('.sub-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + actualSectionId) {
+                link.classList.add('active');
+            }
+        });
+
         sections.forEach(sec => {
             sec.classList.remove('active');
             if (sec.id === actualSectionId) sec.classList.add('active');
@@ -458,7 +465,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (sortableTh) {
             const table = sortableTh.closest('table');
             const configMap = {
-                'admin-cars-table': { by: 'adminSortBy', desc: 'adminSortDesc', render: renderAdminCars },
+                'admin-cars-table': { by: 'adminCarsSortBy', desc: 'adminCarsSortDesc', render: renderAdminCars },
                 'admin-users-table': { by: 'adminUsersSortBy', desc: 'adminUsersSortDesc', render: renderAdminUsers },
                 'admin-bookings-table': { by: 'adminBookingsSortBy', desc: 'adminBookingsSortDesc', render: renderAdminBookings }
             };
@@ -1153,7 +1160,7 @@ window.addEventListener('DOMContentLoaded', () => {
     function renderAdminCars() {
         const tbody = document.getElementById('admin-cars-tbody');
         if (!tbody) return;
-        let sorted = sortData(state.cars, state.adminSortBy, state.adminSortDesc);
+        let sorted = sortData(state.cars, state.adminCarsSortBy, state.adminCarsSortDesc);
         if (sorted.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6">Inga bilar hittades.</td></tr>';
             return;
@@ -1174,7 +1181,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     </button>
                 </td>
             </tr>`).join('');
-        updateAriaSortHeaders('admin-cars-table', state.adminSortBy, state.adminSortDesc);
+        updateAriaSortHeaders('admin-cars-table', state.adminCarsSortBy, state.adminCarsSortDesc);
     }
 
 
@@ -1341,7 +1348,7 @@ window.addEventListener('DOMContentLoaded', () => {
             .catch(error => {
                 if (error.status === 404) {
                     state.userBookings = [];
-                    tbody.innerHTML = '<tr><td colspan="6">Du har inga bokningar.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7">Du har inga bokningar.</td></tr>';
                 } else {
                     showToast('Kunde inte hämta bokningar.', 'error');
                 }
