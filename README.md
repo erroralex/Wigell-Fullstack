@@ -14,7 +14,7 @@ Ett bokningssystem för biluthyrning byggt som en del av Wigellkoncernens webbn�
 ## Sidor & Funktioner
 
 ### Hyrbilar (`#cars`)
-Visar alla tillgängliga bilar i ett kortgalleri. Korten går att sortera på **namn**, **typ** och **pris** i stigande eller fallande ordning. Var femte kort är en annons för andra tjänster inom Wigellkoncernen. Man måste vara inloggad för att boka.
+Visar alla tillgängliga bilar i ett kortgalleri. Korten går att sortera på **namn**, **typ** och **pris** i stigande eller fallande ordning. Var femte kort är en annons för andra tjänster och/eller tjänster inom Wigellkoncernen. Man måste vara inloggad för att boka.
 
 ### Logga in / Skapa konto (`#login`)
 Inloggning med användarnamn och lösenord. Sessionen sparas i `localStorage` så att man slipper logga in på nytt vid sidomladdning. Nya konton skapas via en dialogruta direkt på inloggningssidan.
@@ -24,7 +24,7 @@ Visar den inloggade användarens bokningar i en sorterbar tabell. Aktiva bokning
 
 ### Administration – Bilar (`#admin-cars`)
 *Kräver rollen `ADMIN`.*
-Samtliga kolumner i bilтабellen går att sortera i båda riktningarna. Bilar läggs till, redigeras och tas bort via dialogrutor. Bilduppladdning stöds och bilderna lagras direkt i databasen.
+Samtliga kolumner i biltabellen går att sortera i båda riktningarna. Bilar läggs till, redigeras och tas bort via dialogrutor. Bilduppladdning stöds och bilderna lagras direkt i databasen.
 
 ### Administration – Användare (`#admin-users`)
 *Kräver rollen `ADMIN`.*
@@ -77,9 +77,9 @@ Applikationen startar på `http://localhost:8080` och frontenden nås direkt i w
 
 ## Tillgänglighet (WCAG)
 
-Samtliga sidor uppfyller WCAG **AA-nivå**. Styleguide-sektionen uppfyller **AAA-nivå**. Bland det som är implementerat:
+Samtliga sidor ska uppfylla WCAG **AA-nivå**. Inloggnings-sektionen uppfyller **AAA-nivå**. Bland det som är implementerat:
 
-* Hopplänk till huvudinnehållet överst på sidan
+* "Hoppa till"-länk till huvudinnehållet överst på sidan
 * `aria-live`-regioner för felmeddelanden och dynamiskt innehåll
 * `aria-sort` på alla kolumner i sorterbara tabeller
 * Nativa `<dialog>`-element med `aria-modal` och `aria-labelledby`
@@ -101,10 +101,11 @@ Samtliga sidor uppfyller WCAG **AA-nivå**. Styleguide-sektionen uppfyller **AAA
 
 Distribueras under **MIT-licensen**.
 
+
 ---
 
 <p align="center">
   <b>Utvecklad av</b><br>
-  Alexander Nilsson<br>
-  Copyright © 2026
+  <img src="carRentalBackend/src/main/resources/alx_logo.png" width="120" alt="ALX Logo"><br>
+  Copyright (c) 2026 Alexander Nilsson
 </p>

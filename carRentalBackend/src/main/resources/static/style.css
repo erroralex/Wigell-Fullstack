@@ -771,6 +771,15 @@ main {
     flex-shrink: 0;
 }
 
+.sub-link.active {
+    color: var(--accent);
+}
+
+.sub-link.active::before {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
 .sub-link:hover {
     color: var(--accent);
     background: rgba(230, 157, 103, 0.05);
@@ -1741,10 +1750,6 @@ footer p {
 
 .mt-3 {
     margin-top: 3rem !important;
-}
-
-.mb-1 {
-    margin-bottom: 1rem !important;
 }
 
 .mb-2 {
